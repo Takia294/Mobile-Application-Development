@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import '../screens/splash.dart';
 import '../screens/login.dart';
 import '../screens/registration.dart';
-//import '../screens/dashboard.dart';
+import '../screens/dashboard.dart';
 //import '../screens/find_donor.dart';
-//import '../screens/emergency_request.dart';
+import '../screens/emergency_request.dart';
 //import '../screens/my_request.dart';
 //import '../screens/my_profile.dart';
 
@@ -31,16 +31,16 @@ class AppRoutes {
       case registration:
         return MaterialPageRoute(builder: (_) => const RegistrationScreen());
 
-      /*case dashboard:
+      case dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardScreen());
 
-      case findDonor:
-        return MaterialPageRoute(builder: (_) => const FindDonorScreen());
-
+      /*case findDonor:
+        return MaterialPageRoute(builder: (_) => const FindDonorScreen());*/
+  
       case emergencyRequest:
         return MaterialPageRoute(builder: (_) => const EmergencyRequestScreen());
 
-      case myRequest:
+      /*case myRequest:
         return MaterialPageRoute(builder: (_) => const MyRequestScreen());
 
       case myProfile:
