@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmergencyRequestScreen extends StatefulWidget {
   const EmergencyRequestScreen({super.key});
@@ -11,20 +12,30 @@ class EmergencyRequestScreen extends StatefulWidget {
 
 class _EmergencyRequestScreenState
     extends State<EmergencyRequestScreen> {
-  /// Controllers
-  final TextEditingController addressController =
+
+  /// CONTROLLER
+  final TextEditingController
+      addressController =
       TextEditingController();
 
-  /// Request Type
-  String requestType = 'Blood Donation';
+  /// REQUEST TYPE
+  String requestType =
+      'Blood Donation';
 
-  /// Selected Values
-  String selectedBloodGroup = 'None';
-  String selectedOrgan = 'None';
-  String selectedHospital = 'None';
-  String selectedUrgency = 'Medium';
+  /// SELECTED VALUES
+  String selectedBloodGroup =
+      'None';
 
-  /// Blood Groups
+  String selectedOrgan =
+      'None';
+
+  String selectedHospital =
+      'None';
+
+  String selectedUrgency =
+      'Medium';
+
+  /// BLOOD GROUPS
   final List<String> bloodGroups = [
     'None',
     'A+',
@@ -37,7 +48,7 @@ class _EmergencyRequestScreenState
     'O-',
   ];
 
-  /// Organ List
+  /// ORGANS
   final List<String> organs = [
     'None',
     'Kidney',
@@ -50,7 +61,7 @@ class _EmergencyRequestScreenState
     'Skin Tissue',
   ];
 
-  /// Bangladesh Major Hospitals
+  /// HOSPITALS
   final List<String> hospitals = [
     'None',
     'Dhaka Medical College Hospital - Dhaka',
@@ -69,7 +80,7 @@ class _EmergencyRequestScreenState
     'Cumilla Medical College Hospital - Cumilla',
   ];
 
-  /// Urgency Levels
+  /// URGENCY LEVELS
   final List<String> urgencyLevels = [
     'Low',
     'Medium',
@@ -77,138 +88,264 @@ class _EmergencyRequestScreenState
     'Critical',
   ];
 
-  /// Submit Function
-  void submitRequest() {
-    if (addressController.text.trim().isEmpty) {
-      _showMessage('Please enter address');
+  /// SAVE REQUEST
+  Future<void> submitRequest() async {
+
+    /// VALIDATION
+    if (addressController.text
+        .trim()
+        .isEmpty) {
+
+      _showMessage(
+        'Please enter address',
+      );
+
       return;
     }
 
-    if (selectedHospital == 'None') {
-      _showMessage('Please select hospital');
+    if (selectedHospital ==
+        'None') {
+
+      _showMessage(
+        'Please select hospital',
+      );
+
       return;
     }
 
-    if (selectedBloodGroup == 'None') {
-      _showMessage('Please select blood group');
+    if (selectedBloodGroup ==
+        'None') {
+
+      _showMessage(
+        'Please select blood group',
+      );
+
       return;
     }
 
-    if (requestType == 'Organ Donation' &&
-        selectedOrgan == 'None') {
-      _showMessage('Please select organ');
+    if (requestType ==
+            'Organ Donation' &&
+        selectedOrgan ==
+            'None') {
+
+      _showMessage(
+        'Please select organ',
+      );
+
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    /// SAVE DATA
+    final prefs =
+        await SharedPreferences
+            .getInstance();
+
+    List<String> requests =
+        prefs.getStringList(
+              'requests',
+            ) ??
+            [];
+
+    /// CREATE REQUEST STRING
+    String requestData =
+        '$requestType|'
+        '$selectedBloodGroup|'
+        '$selectedHospital|'
+        '${addressController.text}|'
+        '$selectedUrgency';
+
+    /// ADD NEW REQUEST
+    requests.add(requestData);
+
+    /// SAVE
+    await prefs.setStringList(
+      'requests',
+      requests,
+    );
+
+    /// SUCCESS MESSAGE
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
       const SnackBar(
-        backgroundColor: Colors.green,
+        backgroundColor:
+            Colors.green,
+
         content: Text(
           'Emergency Request Submitted Successfully',
         ),
       ),
     );
 
-    /// Reset Form
+    /// RESET FORM
     setState(() {
+
       addressController.clear();
-      requestType = 'Blood Donation';
-      selectedBloodGroup = 'None';
-      selectedOrgan = 'None';
-      selectedHospital = 'None';
-      selectedUrgency = 'Medium';
+
+      requestType =
+          'Blood Donation';
+
+      selectedBloodGroup =
+          'None';
+
+      selectedOrgan =
+          'None';
+
+      selectedHospital =
+          'None';
+
+      selectedUrgency =
+          'Medium';
     });
   }
 
-  void _showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+  /// SHOW MESSAGE
+  void _showMessage(
+      String msg) {
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      SnackBar(
+        content: Text(msg),
+      ),
     );
   }
 
   @override
   void dispose() {
+
     addressController.dispose();
+
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EEEE),
+      backgroundColor:
+          const Color(
+        0xFFF5EEEE,
+      ),
 
       appBar: AppBar(
-        backgroundColor: Colors.red,
+        backgroundColor:
+            Colors.red,
+
         elevation: 0,
+
         centerTitle: true,
+
         title: const Text(
           'Emergency Request',
+
           style: TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+
+            fontWeight:
+                FontWeight.bold,
           ),
         ),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body:
+          SingleChildScrollView(
+
+        padding:
+            const EdgeInsets.all(
+          16,
+        ),
 
         child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
+
+          padding:
+              const EdgeInsets.all(
+            18,
+          ),
+
+          decoration:
+              BoxDecoration(
             color: Colors.white,
+
             borderRadius:
-                BorderRadius.circular(20),
+                BorderRadius.circular(
+              20,
+            ),
           ),
 
           child: Column(
+
             crossAxisAlignment:
-                CrossAxisAlignment.start,
+                CrossAxisAlignment
+                    .start,
+
             children: [
+
               const Center(
                 child: Text(
                   "Don't worry, We are there for you ❤️",
+
                   style: TextStyle(
-                    color: Colors.black54,
+                    color:
+                        Colors.black54,
+
                     fontSize: 15,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(
+                  height: 25),
 
-              /// Request Type
+              /// REQUEST TYPE
               const Text(
                 'Request Type',
+
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight:
+                      FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(
+                  height: 8),
 
               _dropdownContainer(
+
                 DropdownButton<String>(
+
                   value: requestType,
+
                   isExpanded: true,
+
                   underline:
                       const SizedBox(),
+
                   items: const [
+
                     DropdownMenuItem(
                       value:
                           'Blood Donation',
+
                       child: Text(
-                          'Blood Donation'),
+                        'Blood Donation',
+                      ),
                     ),
+
                     DropdownMenuItem(
                       value:
                           'Organ Donation',
+
                       child: Text(
-                          'Organ Donation'),
+                        'Organ Donation',
+                      ),
                     ),
                   ],
+
                   onChanged: (value) {
+
                     setState(() {
+
                       requestType =
                           value!;
                     });
@@ -216,37 +353,53 @@ class _EmergencyRequestScreenState
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(
+                  height: 16),
 
-              /// Blood Group
+              /// BLOOD GROUP
               const Text(
                 'Blood Group',
+
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight:
+                      FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(
+                  height: 8),
 
               _dropdownContainer(
+
                 DropdownButton<String>(
+
                   value:
                       selectedBloodGroup,
+
                   isExpanded: true,
+
                   underline:
                       const SizedBox(),
+
                   items: bloodGroups
                       .map(
                         (blood) =>
                             DropdownMenuItem(
-                          value: blood,
+                          value:
+                              blood,
+
                           child:
-                              Text(blood),
+                              Text(
+                            blood,
+                          ),
                         ),
                       )
                       .toList(),
+
                   onChanged: (value) {
+
                     setState(() {
+
                       selectedBloodGroup =
                           value!;
                     });
@@ -254,13 +407,16 @@ class _EmergencyRequestScreenState
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(
+                  height: 16),
 
-              /// Organ (only for Organ Donation)
+              /// ORGAN
               if (requestType ==
                   'Organ Donation') ...[
+
                 const Text(
                   'Select Organ',
+
                   style: TextStyle(
                     fontWeight:
                         FontWeight.bold,
@@ -271,19 +427,24 @@ class _EmergencyRequestScreenState
                     height: 8),
 
                 _dropdownContainer(
-                  DropdownButton<
-                      String>(
+
+                  DropdownButton<String>(
+
                     value:
                         selectedOrgan,
+
                     isExpanded: true,
+
                     underline:
                         const SizedBox(),
+
                     items: organs
                         .map(
                           (organ) =>
                               DropdownMenuItem(
                             value:
                                 organ,
+
                             child:
                                 Text(
                               organ,
@@ -291,9 +452,12 @@ class _EmergencyRequestScreenState
                           ),
                         )
                         .toList(),
+
                     onChanged:
                         (value) {
+
                       setState(() {
+
                         selectedOrgan =
                             value!;
                       });
@@ -305,28 +469,36 @@ class _EmergencyRequestScreenState
                     height: 16),
               ],
 
-              /// Hospital Search
+              /// HOSPITAL
               const Text(
                 'Choose Hospital',
+
                 style: TextStyle(
                   fontWeight:
                       FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(
+                  height: 8),
 
               DropdownSearch<String>(
+
                 items: hospitals,
+
                 selectedItem:
                     selectedHospital,
+
                 popupProps:
                     const PopupProps
                         .menu(
+
                   showSearchBox:
                       true,
+
                   searchFieldProps:
                       TextFieldProps(
+
                     decoration:
                         InputDecoration(
                       hintText:
@@ -334,28 +506,38 @@ class _EmergencyRequestScreenState
                     ),
                   ),
                 ),
+
                 dropdownDecoratorProps:
                     DropDownDecoratorProps(
+
                   dropdownSearchDecoration:
                       InputDecoration(
+
                     filled: true,
+
                     fillColor:
-                        const Color(
-                            0xFFF3EFEF),
+                        Color(
+                      0xFFF3EFEF,
+                    ),
+
                     border:
                         OutlineInputBorder(
+
                       borderRadius:
-                          BorderRadius
-                              .circular(
-                                  12),
+                          BorderRadius.circular(
+                        12,
+                      ),
+
                       borderSide:
-                          BorderSide
-                              .none,
+                          BorderSide.none,
                     ),
                   ),
                 ),
+
                 onChanged: (value) {
+
                   setState(() {
+
                     selectedHospital =
                         value ??
                             'None';
@@ -363,73 +545,94 @@ class _EmergencyRequestScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(
+                  height: 16),
 
-              /// Address
+              /// ADDRESS
               const Text(
                 'Address',
+
                 style: TextStyle(
                   fontWeight:
                       FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(
+                  height: 8),
 
               TextField(
+
                 controller:
                     addressController,
+
                 decoration:
                     InputDecoration(
+
                   hintText:
                       'Enter Address',
+
                   filled: true,
+
                   fillColor:
                       const Color(
-                          0xFFF3EFEF),
+                    0xFFF3EFEF,
+                  ),
+
                   prefixIcon:
                       const Icon(
                     Icons.location_on,
                   ),
+
                   border:
                       OutlineInputBorder(
+
                     borderRadius:
-                        BorderRadius
-                            .circular(
-                                12),
+                        BorderRadius.circular(
+                      12,
+                    ),
+
                     borderSide:
                         BorderSide.none,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(
+                  height: 16),
 
-              /// Urgency
+              /// URGENCY
               const Text(
                 'Urgency Level',
+
                 style: TextStyle(
                   fontWeight:
                       FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(
+                  height: 8),
 
               _dropdownContainer(
+
                 DropdownButton<String>(
+
                   value:
                       selectedUrgency,
+
                   isExpanded: true,
+
                   underline:
                       const SizedBox(),
+
                   items:
                       urgencyLevels
                           .map(
                             (e) =>
                                 DropdownMenuItem(
-                              value:
-                                  e,
+                              value: e,
+
                               child:
                                   Text(
                                 e,
@@ -437,9 +640,12 @@ class _EmergencyRequestScreenState
                             ),
                           )
                           .toList(),
+
                   onChanged:
                       (value) {
+
                     setState(() {
+
                       selectedUrgency =
                           value!;
                     });
@@ -447,37 +653,50 @@ class _EmergencyRequestScreenState
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(
+                  height: 30),
 
-              /// Submit
+              /// SUBMIT BUTTON
               SizedBox(
+
                 width:
                     double.infinity,
+
                 height: 55,
+
                 child:
                     ElevatedButton(
+
                   style:
                       ElevatedButton
                           .styleFrom(
+
                     backgroundColor:
                         Colors.red,
+
                     shape:
                         RoundedRectangleBorder(
+
                       borderRadius:
                           BorderRadius.circular(
-                              14),
+                        14,
+                      ),
                     ),
                   ),
+
                   onPressed:
                       submitRequest,
+
                   child:
                       const Text(
+
                     'Submit Request',
-                    style:
-                        TextStyle(
+
+                    style: TextStyle(
                       fontSize: 18,
-                      color: Colors
-                          .white,
+
+                      color:
+                          Colors.white,
                     ),
                   ),
                 ),
@@ -489,19 +708,30 @@ class _EmergencyRequestScreenState
     );
   }
 
+  /// DROPDOWN CONTAINER
   Widget _dropdownContainer(
       Widget child) {
+
     return Container(
+
       padding:
           const EdgeInsets.symmetric(
-              horizontal: 12),
-      decoration: BoxDecoration(
-        color:
-            const Color(0xFFF3EFEF),
+        horizontal: 12,
+      ),
+
+      decoration:
+          BoxDecoration(
+
+        color: const Color(
+          0xFFF3EFEF,
+        ),
+
         borderRadius:
             BorderRadius.circular(
-                12),
+          12,
+        ),
       ),
+
       child: child,
     );
   }

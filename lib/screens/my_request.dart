@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../routes/screen_routes.dart';
 import 'dashboard.dart';
 import 'emergency_request.dart';
 import 'myprofile.dart';
@@ -17,6 +17,120 @@ class _MyRequestScreenState
     extends State<MyRequestScreen> {
 
   bool activeTab = true;
+
+  /// ACTIVE REQUESTS
+  List<Map<String, String>> activeRequests = [];
+
+  /// COMPLETED REQUESTS
+  List<Map<String, String>> completedRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadRequests();
+  }
+
+  /// LOAD ALL REQUESTS
+  Future<void> loadRequests() async {
+
+    final prefs =
+        await SharedPreferences.getInstance();
+
+    /// ACTIVE REQUESTS
+    List<String> activeList =
+        prefs.getStringList(
+              'requests',
+            ) ??
+            [];
+
+    /// COMPLETED REQUESTS
+    List<String> completedList =
+        prefs.getStringList(
+              'completed_requests',
+            ) ??
+            [];
+
+    setState(() {
+
+      activeRequests =
+          activeList.map((e) {
+
+        List<String> data = e.split('|');
+
+        return {
+          'type': data[0],
+          'blood': data[1],
+          'hospital': data[2],
+          'address': data[3],
+          'urgency': data[4],
+        };
+
+      }).toList();
+
+      completedRequests =
+          completedList.map((e) {
+
+        List<String> data = e.split('|');
+
+        return {
+          'type': data[0],
+          'blood': data[1],
+          'hospital': data[2],
+          'address': data[3],
+          'urgency': data[4],
+        };
+
+      }).toList();
+    });
+  }
+
+  /// COMPLETE REQUEST
+  Future<void> completeRequest(
+      int index) async {
+
+    final prefs =
+        await SharedPreferences.getInstance();
+
+    List<String> activeList =
+        prefs.getStringList(
+              'requests',
+            ) ??
+            [];
+
+    List<String> completedList =
+        prefs.getStringList(
+              'completed_requests',
+            ) ??
+            [];
+
+    /// MOVE ACTIVE TO COMPLETED
+    completedList.add(
+      activeList[index],
+    );
+
+    activeList.removeAt(index);
+
+    await prefs.setStringList(
+      'requests',
+      activeList,
+    );
+
+    await prefs.setStringList(
+      'completed_requests',
+      completedList,
+    );
+
+    loadRequests();
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Request Completed Successfully',
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +162,7 @@ class _MyRequestScreenState
             Row(
               mainAxisAlignment:
                   MainAxisAlignment.center,
+
               children: [
 
                 GestureDetector(
@@ -62,6 +177,7 @@ class _MyRequestScreenState
 
                       Text(
                         'Active Request',
+
                         style: TextStyle(
                           color: activeTab
                               ? Colors.red
@@ -76,8 +192,9 @@ class _MyRequestScreenState
                           height: 4),
 
                       Container(
-                        width: 70,
+                        width: 90,
                         height: 2,
+
                         color: activeTab
                             ? Colors.red
                             : Colors.transparent,
@@ -99,7 +216,8 @@ class _MyRequestScreenState
                     children: [
 
                       Text(
-                        'Past request',
+                        'Past Request',
+
                         style: TextStyle(
                           color: !activeTab
                               ? Colors.red
@@ -114,8 +232,9 @@ class _MyRequestScreenState
                           height: 4),
 
                       Container(
-                        width: 70,
+                        width: 80,
                         height: 2,
+
                         color: !activeTab
                             ? Colors.red
                             : Colors.transparent,
@@ -131,6 +250,7 @@ class _MyRequestScreenState
             Expanded(
               child:
                   SingleChildScrollView(
+
                 padding:
                     const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -143,278 +263,295 @@ class _MyRequestScreenState
 
                   children: [
 
-                    /// ACTIVE REQUEST
+                    /// ACTIVE REQUESTS
                     if (activeTab) ...[
 
-                      Container(
-                        padding:
-                            const EdgeInsets.all(
-                                14),
+                      activeRequests.isEmpty
 
-                        decoration:
-                            BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(
-                                  18),
-                        ),
-
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start,
-
-                          children: [
-
-                            Row(
-                              children: [
-
-                                const Icon(
-                                  Icons.person_outline,
-                                  size: 30,
+                          ? const Center(
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(
+                                  top: 80,
                                 ),
 
-                                const SizedBox(
-                                    width: 10),
+                                child: Text(
+                                  'No Active Requests',
 
-                                const Text(
-                                  'Blood Donation Request',
-                                  style:
-                                      TextStyle(
-                                    fontSize: 20,
+                                  style: TextStyle(
+                                    fontSize: 18,
                                     fontWeight:
-                                        FontWeight
-                                            .bold,
+                                        FontWeight.bold,
                                   ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(
-                                height: 18),
-
-                            Row(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
-
-                              children: [
-
-                                Icon(
-                                  Icons.water_drop,
-                                  color: Colors.red
-                                      .shade700,
-                                  size: 35,
-                                ),
-
-                                const SizedBox(
-                                    width: 12),
-
-                                const Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
-
-                                  children: [
-
-                                    Text(
-                                      'Blood Type: A+',
-                                      style:
-                                          TextStyle(
-                                        fontSize:
-                                            16,
-                                      ),
-                                    ),
-
-                                    SizedBox(
-                                        height:
-                                            4),
-
-                                    Text(
-                                      'City Hospital - 2Km away',
-                                      style:
-                                          TextStyle(
-                                        color:
-                                            Colors.black54,
-                                      ),
-                                    ),
-
-                                    SizedBox(
-                                        height:
-                                            8),
-
-                                    Text(
-                                      'Status : Urgent',
-                                      style:
-                                          TextStyle(
-                                        color:
-                                            Colors.red,
-                                        fontWeight:
-                                            FontWeight.bold,
-                                        fontSize:
-                                            20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(
-                                height: 20),
-
-                            /// BUTTONS
-                            Row(
-                              children: [
-
-                                Expanded(
-                                  child:
-                                      ElevatedButton(
-                                    style:
-                                        ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.red,
-
-                                      shape:
-                                          RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(
-                                                10),
-                                      ),
-                                    ),
-
-                                    onPressed:
-                                        () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        AppRoutes
-                                            .emergencyRequest,
-                                      );
-                                    },
-
-                                    child:
-                                        const Text(
-                                      'Respond to Blood Request',
-                                      style:
-                                          TextStyle(
-                                        color:
-                                            Colors.white,
-                                        fontSize:
-                                            11,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(
-                                    width: 8),
-
-                                Expanded(
-                                  child:
-                                      ElevatedButton(
-                                    style:
-                                        ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.blue,
-
-                                      shape:
-                                          RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(
-                                                10),
-                                      ),
-                                    ),
-
-                                    onPressed:
-                                        () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        AppRoutes
-                                            .emergencyRequest,
-                                      );
-                                    },
-
-                                    child:
-                                        const Text(
-                                      'Respond to Organ Request',
-                                      style:
-                                          TextStyle(
-                                        color:
-                                            Colors.white,
-                                        fontSize:
-                                            11,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(
-                                height: 12),
-
-                            const Center(
-                              child: Text(
-                                'in progress',
-                                style:
-                                    TextStyle(
-                                  color:
-                                      Colors.black,
                                 ),
                               ),
+                            )
+
+                          : Column(
+                              children:
+                                  List.generate(
+                                activeRequests.length,
+
+                                (index) {
+
+                                  final request =
+                                      activeRequests[index];
+
+                                  return Container(
+
+                                    margin:
+                                        const EdgeInsets.only(
+                                      bottom: 18,
+                                    ),
+
+                                    padding:
+                                        const EdgeInsets.all(
+                                      14,
+                                    ),
+
+                                    decoration:
+                                        BoxDecoration(
+                                      color:
+                                          Colors.white,
+
+                                      borderRadius:
+                                          BorderRadius.circular(
+                                        18,
+                                      ),
+                                    ),
+
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment
+                                              .start,
+
+                                      children: [
+
+                                        /// TITLE
+                                        Row(
+                                          children: [
+
+                                            const Icon(
+                                              Icons.person_outline,
+                                              size: 30,
+                                            ),
+
+                                            const SizedBox(
+                                                width: 10),
+
+                                            Expanded(
+                                              child: Text(
+                                                request['type']!,
+                                                style:
+                                                    const TextStyle(
+                                                  fontSize:
+                                                      20,
+
+                                                  fontWeight:
+                                                      FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        const SizedBox(
+                                            height: 18),
+
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment
+                                                  .start,
+
+                                          children: [
+
+                                            Icon(
+                                              Icons.water_drop,
+                                              color:
+                                                  Colors.red.shade700,
+
+                                              size: 35,
+                                            ),
+
+                                            const SizedBox(
+                                                width: 12),
+
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment
+                                                        .start,
+
+                                                children: [
+
+                                                  Text(
+                                                    'Blood Type: ${request['blood']}',
+
+                                                    style:
+                                                        const TextStyle(
+                                                      fontSize:
+                                                          16,
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(
+                                                      height: 4),
+
+                                                  Text(
+                                                    request['hospital']!,
+
+                                                    style:
+                                                        const TextStyle(
+                                                      color:
+                                                          Colors.black54,
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(
+                                                      height: 4),
+
+                                                  Text(
+                                                    request['address']!,
+
+                                                    style:
+                                                        const TextStyle(
+                                                      color:
+                                                          Colors.black54,
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(
+                                                      height: 8),
+
+                                                  Text(
+                                                    'Status : ${request['urgency']}',
+
+                                                    style:
+                                                        const TextStyle(
+                                                      color:
+                                                          Colors.red,
+
+                                                      fontWeight:
+                                                          FontWeight.bold,
+
+                                                      fontSize:
+                                                          20,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        const SizedBox(
+                                            height: 20),
+
+                                        /// COMPLETE BUTTON
+                                        SizedBox(
+                                          width:
+                                              double.infinity,
+
+                                          child:
+                                              ElevatedButton(
+
+                                            style:
+                                                ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.red,
+
+                                              shape:
+                                                  RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                  10,
+                                                ),
+                                              ),
+                                            ),
+
+                                            onPressed: () {
+                                              completeRequest(
+                                                index,
+                                              );
+                                            },
+
+                                            child:
+                                                const Text(
+                                              'Mark as Complete',
+
+                                              style:
+                                                  TextStyle(
+                                                color:
+                                                    Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(
+                                            height: 10),
+
+                                        const Center(
+                                          child: Text(
+                                            'In Progress',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
                     ],
 
-                    const SizedBox(height: 25),
-
                     /// PAST REQUESTS
-                    const Text(
-                      'Past requests',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight:
-                            FontWeight.bold,
-                      ),
-                    ),
+                    if (!activeTab) ...[
 
-                    const SizedBox(height: 14),
+                      completedRequests.isEmpty
 
-                    _pastRequestCard(
-                      image:
-                          'https://cdn-icons-png.flaticon.com/512/3774/3774299.png',
+                          ? const Center(
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(
+                                  top: 80,
+                                ),
 
-                      title:
-                          'Blood Donation Request',
+                                child: Text(
+                                  'No Past Requests',
 
-                      blood:
-                          'Blood Type : O-',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
 
-                      location:
-                          'Metro Hospital - 2Km away',
+                          : Column(
+                              children:
+                                  List.generate(
+                                completedRequests.length,
 
-                      status:
-                          'Status : Donated',
-                    ),
+                                (index) {
 
-                    _pastRequestCard(
-                      image:
-                          'https://cdn-icons-png.flaticon.com/512/387/387561.png',
+                                  final request =
+                                      completedRequests[index];
 
-                      title:
-                          'Organ Donation Request',
-
-                      blood:
-                          'Kidney Donation',
-
-                      location:
-                          'Green Hospital - 5 Km away',
-
-                      status:
-                          'Status : Completed',
-                    ),
+                                  return _pastRequestCard(
+                                    title:
+                                        request['type']!,
+                                    blood:
+                                        request['blood']!,
+                                    location:
+                                        request['hospital']!,
+                                    status:
+                                        'Completed',
+                                  );
+                                },
+                              ),
+                            ),
+                    ],
 
                     const SizedBox(height: 20),
                   ],
@@ -425,9 +562,10 @@ class _MyRequestScreenState
         ),
       ),
 
-      /// BOTTOM NAVBAR
+      /// BOTTOM NAVIGATION
       bottomNavigationBar:
           BottomNavigationBar(
+
         currentIndex: 2,
 
         type:
@@ -446,6 +584,7 @@ class _MyRequestScreenState
         onTap: (index) {
 
           if (index == 0) {
+
             Navigator.pushReplacement(
               context,
 
@@ -457,6 +596,7 @@ class _MyRequestScreenState
           }
 
           else if (index == 1) {
+
             Navigator.pushReplacement(
               context,
 
@@ -468,6 +608,7 @@ class _MyRequestScreenState
           }
 
           else if (index == 3) {
+
             Navigator.pushReplacement(
               context,
 
@@ -482,17 +623,21 @@ class _MyRequestScreenState
         items: const [
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
+            icon:
+                Icon(Icons.home_outlined),
             label: '',
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.edit_note),
+            icon:
+                Icon(Icons.edit_note),
             label: '',
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
+            icon: Icon(
+              Icons.assignment_outlined,
+            ),
             label: '',
           ),
 
@@ -507,14 +652,16 @@ class _MyRequestScreenState
 
   /// PAST REQUEST CARD
   Widget _pastRequestCard({
-    required String image,
+
     required String title,
     required String blood,
     required String location,
     required String status,
+
   }) {
 
     return Container(
+
       margin:
           const EdgeInsets.only(
         bottom: 14,
@@ -529,7 +676,8 @@ class _MyRequestScreenState
 
         borderRadius:
             BorderRadius.circular(
-                18),
+          18,
+        ),
       ),
 
       child: Row(
@@ -537,11 +685,14 @@ class _MyRequestScreenState
 
           CircleAvatar(
             radius: 28,
+
             backgroundColor:
                 Colors.red.shade100,
 
-            backgroundImage:
-                NetworkImage(image),
+            child: const Icon(
+              Icons.favorite,
+              color: Colors.red,
+            ),
           ),
 
           const SizedBox(width: 12),
@@ -556,10 +707,12 @@ class _MyRequestScreenState
 
                 Text(
                   title,
+
                   style:
                       const TextStyle(
                     fontWeight:
                         FontWeight.bold,
+
                     fontSize: 18,
                   ),
                 ),
@@ -567,7 +720,8 @@ class _MyRequestScreenState
                 const SizedBox(height: 4),
 
                 Text(
-                  blood,
+                  'Blood Type : $blood',
+
                   style:
                       const TextStyle(
                     color:
@@ -577,6 +731,7 @@ class _MyRequestScreenState
 
                 Text(
                   location,
+
                   style:
                       const TextStyle(
                     color:
@@ -588,6 +743,7 @@ class _MyRequestScreenState
 
                 Text(
                   status,
+
                   style:
                       TextStyle(
                     color:
