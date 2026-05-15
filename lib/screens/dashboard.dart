@@ -9,7 +9,8 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7EFEF),
+      backgroundColor:
+          const Color(0xFFF7EFEF),
 
       body: SafeArea(
         child: Column(
@@ -18,36 +19,46 @@ class DashboardScreen extends StatelessWidget {
             /// HEADER
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.only(
+              padding:
+                  const EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 15,
                 bottom: 28,
               ),
 
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF5757),
+              decoration:
+                  const BoxDecoration(
+                color:
+                    Color(0xFFFF5757),
 
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(22),
-                  bottomRight: Radius.circular(22),
+                borderRadius:
+                    BorderRadius.only(
+                  bottomLeft:
+                      Radius.circular(
+                          22),
+                  bottomRight:
+                      Radius.circular(
+                          22),
                 ),
               ),
 
               child: const Column(
                 crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                    CrossAxisAlignment
+                        .start,
 
                 children: [
 
                   Text(
                     'Welcome Dear',
-
                     style: TextStyle(
-                      color: Colors.white,
+                      color:
+                          Colors.white,
                       fontSize: 24,
                       fontWeight:
-                          FontWeight.w600,
+                          FontWeight
+                              .w600,
                     ),
                   ),
 
@@ -55,9 +66,9 @@ class DashboardScreen extends StatelessWidget {
 
                   Text(
                     "Let’s make a difference together",
-
                     style: TextStyle(
-                      color: Colors.white70,
+                      color:
+                          Colors.white70,
                       fontSize: 14,
                     ),
                   ),
@@ -66,53 +77,64 @@ class DashboardScreen extends StatelessWidget {
             ),
 
             Expanded(
-              child: SingleChildScrollView(
+              child:
+                  SingleChildScrollView(
                 padding:
-                    const EdgeInsets.all(16),
+                    const EdgeInsets.all(
+                        16),
 
                 child: Column(
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      CrossAxisAlignment
+                          .start,
 
                   children: [
 
                     /// GOOD MORNING
                     const Text(
                       'Good Morning 👋',
-
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight:
-                            FontWeight.bold,
+                            FontWeight
+                                .bold,
                       ),
                     ),
 
-                    const SizedBox(height: 5),
+                    const SizedBox(
+                        height: 5),
 
                     const Text(
                       "Don’t worry, We are always there for you",
-
                       style: TextStyle(
-                        color: Colors.black54,
+                        color:
+                            Colors.black54,
                         fontSize: 14,
                       ),
                     ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(
+                        height: 22),
 
                     /// EMERGENCY CARD
                     Container(
-                      width: double.infinity,
+                      width:
+                          double.infinity,
 
                       padding:
-                          const EdgeInsets.all(16),
+                          const EdgeInsets
+                              .all(16),
 
-                      decoration: BoxDecoration(
+                      decoration:
+                          BoxDecoration(
                         color:
-                            const Color(0xFFF4EEEE),
+                            const Color(
+                                0xFFF4EEEE),
 
                         borderRadius:
-                            BorderRadius.circular(18),
+                            BorderRadius
+                                .circular(
+                                    18),
                       ),
 
                       child: Row(
@@ -121,31 +143,41 @@ class DashboardScreen extends StatelessWidget {
                           Expanded(
                             child: Column(
                               crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  CrossAxisAlignment
+                                      .start,
 
                               children: [
 
                                 const Text(
                                   'Emergency Donation Request',
 
-                                  style: TextStyle(
+                                  style:
+                                      TextStyle(
                                     fontWeight:
-                                        FontWeight.bold,
-                                    fontSize: 16,
+                                        FontWeight
+                                            .bold,
+                                    fontSize:
+                                        16,
                                   ),
                                 ),
 
-                                const SizedBox(height: 8),
+                                const SizedBox(
+                                    height:
+                                        8),
 
                                 const Text(
                                   'Urgent: Blood type A+ or kidney needed',
 
-                                  style: TextStyle(
-                                    fontSize: 13,
+                                  style:
+                                      TextStyle(
+                                    fontSize:
+                                        13,
                                   ),
                                 ),
 
-                                const SizedBox(height: 14),
+                                const SizedBox(
+                                    height:
+                                        14),
 
                                 ElevatedButton(
                                   style:
@@ -162,12 +194,27 @@ class DashboardScreen extends StatelessWidget {
                                     ),
                                   ),
 
-                                  onPressed: () {},
+                                  onPressed:
+                                      () {
+                                    Navigator.push(
+                                      context,
 
-                                  child: const Text(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (
+                                              context,
+                                            ) =>
+                                                const EmergencyRequestScreen(),
+                                      ),
+                                    );
+                                  },
+
+                                  child:
+                                      const Text(
                                     'Respond to Request',
 
-                                    style: TextStyle(
+                                    style:
+                                        TextStyle(
                                       color:
                                           Colors.white,
                                     ),
@@ -177,45 +224,36 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
 
-                          const SizedBox(width: 12),
+                          const SizedBox(
+                              width: 12),
 
                           Image.network(
                             'https://cdn-icons-png.flaticon.com/512/3209/3209265.png',
 
                             height: 90,
-
-                            errorBuilder:
-                                (
-                                  context,
-                                  error,
-                                  stackTrace,
-                                ) {
-                              return const Icon(
-                                Icons.image_not_supported,
-                                size: 70,
-                                color: Colors.grey,
-                              );
-                            },
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(
+                        height: 30),
 
                     /// QUICK ACTIONS
                     const Text(
                       'Quick Actions',
-
                       style: TextStyle(
-                        color: Colors.grey,
+                        color:
+                            Colors.grey,
                         fontWeight:
-                            FontWeight.bold,
+                            FontWeight
+                                .bold,
                         fontSize: 18,
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(
+                        height: 20),
 
                     GridView.count(
                       shrinkWrap: true,
@@ -225,10 +263,14 @@ class DashboardScreen extends StatelessWidget {
 
                       crossAxisCount: 2,
 
-                      crossAxisSpacing: 15,
-                      mainAxisSpacing: 15,
+                      crossAxisSpacing:
+                          15,
 
-                      childAspectRatio: 2.2,
+                      mainAxisSpacing:
+                          15,
+
+                      childAspectRatio:
+                          2.2,
 
                       children: [
 
@@ -236,12 +278,15 @@ class DashboardScreen extends StatelessWidget {
                         _quickAction(
                           context,
 
-                          icon: Icons.search,
+                          icon:
+                              Icons.search,
 
-                          title: 'Find Donors',
+                          title:
+                              'Find Donors',
 
                           onTap: () {
-                            ScaffoldMessenger.of(context)
+                            ScaffoldMessenger.of(
+                                    context)
                                 .showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -256,14 +301,17 @@ class DashboardScreen extends StatelessWidget {
                         _quickAction(
                           context,
 
-                          icon: Icons.bloodtype,
+                          icon:
+                              Icons.bloodtype,
 
-                          title: 'Book Request',
+                          title:
+                              'Book Request',
 
                           onTap: () {
                             Navigator.pushNamed(
                               context,
-                              AppRoutes.emergencyRequest,
+                              AppRoutes
+                                  .emergencyRequest,
                             );
                           },
                         ),
@@ -272,18 +320,17 @@ class DashboardScreen extends StatelessWidget {
                         _quickAction(
                           context,
 
-                          icon: Icons.warning_amber_rounded,
+                          icon: Icons
+                              .warning_amber_rounded,
 
-                          title: 'My Request',
+                          title:
+                              'My Request',
 
                           onTap: () {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'My Request Coming Soon',
-                                ),
-                              ),
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes
+                                  .myRequest,
                             );
                           },
                         ),
@@ -292,16 +339,19 @@ class DashboardScreen extends StatelessWidget {
                         _quickAction(
                           context,
 
-                          icon: Icons.phone,
+                          icon:
+                              Icons.phone,
 
-                          title: 'Center',
+                          title:
+                              'Center',
 
                           onTap: () {
-                            ScaffoldMessenger.of(context)
+                            ScaffoldMessenger.of(
+                                    context)
                                 .showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                  'Center Feature Coming Soon',
+                                  'Center List Coming Soon',
                                 ),
                               ),
                             );
@@ -310,36 +360,47 @@ class DashboardScreen extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(
+                        height: 30),
 
                     /// NEARBY HOSPITAL
                     Row(
                       mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                          MainAxisAlignment
+                              .spaceBetween,
 
                       children: [
 
                         const Text(
                           'Nearby Hospital',
 
-                          style: TextStyle(
-                            color: Colors.grey,
+                          style:
+                              TextStyle(
+                            color:
+                                Colors.grey,
                             fontWeight:
-                                FontWeight.bold,
-                            fontSize: 18,
+                                FontWeight
+                                    .bold,
+                            fontSize:
+                                18,
                           ),
                         ),
 
                         TextButton(
-                          onPressed: () {},
+                          onPressed:
+                              () {},
 
-                          child: const Text(
+                          child:
+                              const Text(
                             'See All >',
 
-                            style: TextStyle(
-                              color: Colors.red,
+                            style:
+                                TextStyle(
+                              color:
+                                  Colors.red,
                               fontWeight:
-                                  FontWeight.bold,
+                                  FontWeight
+                                      .bold,
                             ),
                           ),
                         ),
@@ -348,14 +409,19 @@ class DashboardScreen extends StatelessWidget {
 
                     Container(
                       padding:
-                          const EdgeInsets.all(14),
+                          const EdgeInsets
+                              .all(14),
 
-                      decoration: BoxDecoration(
+                      decoration:
+                          BoxDecoration(
                         color:
-                            const Color(0xFFF0EAEA),
+                            const Color(
+                                0xFFF0EAEA),
 
                         borderRadius:
-                            BorderRadius.circular(12),
+                            BorderRadius
+                                .circular(
+                                    12),
                       ),
 
                       child: Row(
@@ -368,39 +434,53 @@ class DashboardScreen extends StatelessWidget {
                                 Colors.white,
 
                             child: Icon(
-                              Icons.local_hospital,
-                              color: Colors.red,
+                              Icons
+                                  .local_hospital,
+
+                              color:
+                                  Colors.red,
+
                               size: 30,
                             ),
                           ),
 
-                          const SizedBox(width: 12),
+                          const SizedBox(
+                              width: 12),
 
                           const Expanded(
                             child: Column(
                               crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  CrossAxisAlignment
+                                      .start,
 
                               children: [
 
                                 Text(
                                   'City Hospital',
 
-                                  style: TextStyle(
+                                  style:
+                                      TextStyle(
                                     fontWeight:
-                                        FontWeight.bold,
-                                    fontSize: 15,
+                                        FontWeight
+                                            .bold,
+                                    fontSize:
+                                        15,
                                   ),
                                 ),
 
-                                SizedBox(height: 5),
+                                SizedBox(
+                                    height:
+                                        5),
 
                                 Text(
                                   '2 Km away - Open 24/7',
 
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
+                                  style:
+                                      TextStyle(
+                                    color:
+                                        Colors.grey,
+                                    fontSize:
+                                        12,
                                   ),
                                 ),
                               ],
@@ -409,7 +489,10 @@ class DashboardScreen extends StatelessWidget {
 
                           const Icon(
                             Icons.add,
-                            color: Colors.red,
+
+                            color:
+                                Colors.red,
+
                             size: 30,
                           ),
                         ],
@@ -423,50 +506,51 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
 
-      /// BOTTOM NAVIGATION BAR
-      bottomNavigationBar: BottomNavigationBar(
+      /// BOTTOM NAVIGATION
+      bottomNavigationBar:
+          BottomNavigationBar(
         currentIndex: 0,
 
-        type: BottomNavigationBarType.fixed,
+        type:
+            BottomNavigationBarType
+                .fixed,
 
-        selectedItemColor: Colors.red,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor:
+            Colors.red,
 
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
+        unselectedItemColor:
+            Colors.grey,
+
+        showSelectedLabels:
+            false,
+
+        showUnselectedLabels:
+            false,
 
         onTap: (index) {
 
           /// HOME
-          if (index == 0) {
-            return;
-          }
+          if (index == 0) {}
 
-          /// EMERGENCY REQUEST
-          if (index == 1) {
-
+          /// REQUEST
+          else if (index == 1) {
             Navigator.pushNamed(
               context,
-              AppRoutes.emergencyRequest,
+              AppRoutes
+                  .emergencyRequest,
             );
           }
 
           /// MY REQUEST
-          if (index == 2) {
-
-            ScaffoldMessenger.of(context)
-                .showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'My Request Coming Soon',
-                ),
-              ),
+          else if (index == 2) {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.myRequest,
             );
           }
 
           /// PROFILE
-          if (index == 3) {
-
+          else if (index == 3) {
             Navigator.pushNamed(
               context,
               AppRoutes.myProfile,
@@ -477,12 +561,14 @@ class DashboardScreen extends StatelessWidget {
         items: const [
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon:
+                Icon(Icons.home),
             label: '',
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.edit_note),
+            icon:
+                Icon(Icons.edit_note),
             label: '',
           ),
 
@@ -492,7 +578,8 @@ class DashboardScreen extends StatelessWidget {
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon:
+                Icon(Icons.person),
             label: '',
           ),
         ],
@@ -503,7 +590,6 @@ class DashboardScreen extends StatelessWidget {
   /// QUICK ACTION WIDGET
   Widget _quickAction(
     BuildContext context, {
-
     required IconData icon,
     required String title,
     required VoidCallback onTap,
@@ -517,19 +603,21 @@ class DashboardScreen extends StatelessWidget {
 
       child: Container(
         padding:
-            const EdgeInsets.all(14),
+            const EdgeInsets.all(
+                14),
 
         decoration: BoxDecoration(
           color: Colors.white,
 
           borderRadius:
-              BorderRadius.circular(16),
+              BorderRadius.circular(
+                  16),
 
           boxShadow: [
 
             BoxShadow(
-              color:
-                  Colors.black.withOpacity(0.05),
+              color: Colors.black
+                  .withOpacity(0.05),
 
               blurRadius: 8,
             ),
@@ -545,13 +633,15 @@ class DashboardScreen extends StatelessWidget {
               color: Colors.red,
             ),
 
-            const SizedBox(width: 10),
+            const SizedBox(
+                width: 10),
 
             Expanded(
               child: Text(
                 title,
 
-                style: const TextStyle(
+                style:
+                    const TextStyle(
                   fontWeight:
                       FontWeight.bold,
                   fontSize: 16,
