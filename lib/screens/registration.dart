@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+import '../routes/screen_routes.dart';
+
+class RegistrationScreen
+    extends StatefulWidget {
+
+  const RegistrationScreen({
+    super.key,
+  });
 
   @override
-  State<RegistrationScreen> createState() =>
-      _RegistrationScreenState();
+  State<RegistrationScreen>
+      createState() =>
+          _RegistrationScreenState();
 }
 
 class _RegistrationScreenState
-    extends State<RegistrationScreen> {
+    extends State<
+        RegistrationScreen> {
+
   final _formKey =
       GlobalKey<FormState>();
 
-  /// Controllers
+  /// CONTROLLERS
   final fullNameController =
       TextEditingController();
 
@@ -42,28 +51,38 @@ class _RegistrationScreenState
   final confirmPasswordController =
       TextEditingController();
 
-  /// Variables
+  /// VARIABLES
   DateTime? selectedDate;
+
   String? gender;
 
   bool obscurePassword = true;
+
   bool obscureConfirmPassword =
       true;
 
   /// DATE PICKER
   Future<void> pickDate() async {
+
     DateTime? picked =
         await showDatePicker(
+
       context: context,
+
       initialDate:
           DateTime(2000),
+
       firstDate:
           DateTime(1950),
-      lastDate: DateTime.now(),
+
+      lastDate:
+          DateTime.now(),
     );
 
     if (picked != null) {
+
       setState(() {
+
         selectedDate = picked;
       });
     }
@@ -72,43 +91,52 @@ class _RegistrationScreenState
   /// SAVE USER DATA
   Future<void> saveUserData()
       async {
+
     final prefs =
         await SharedPreferences
             .getInstance();
 
+    /// PROFILE DATA
     await prefs.setString(
       'fullName',
-      fullNameController.text,
+      fullNameController.text
+          .trim(),
     );
 
     await prefs.setString(
       'email',
-      emailController.text,
+      emailController.text
+          .trim(),
     );
 
     await prefs.setString(
       'phone',
-      phoneController.text,
+      phoneController.text
+          .trim(),
     );
 
     await prefs.setString(
       'house',
-      houseController.text,
+      houseController.text
+          .trim(),
     );
 
     await prefs.setString(
       'road',
-      roadController.text,
+      roadController.text
+          .trim(),
     );
 
     await prefs.setString(
       'area',
-      areaController.text,
+      areaController.text
+          .trim(),
     );
 
     await prefs.setString(
       'city',
-      cityController.text,
+      cityController.text
+          .trim(),
     );
 
     await prefs.setString(
@@ -123,7 +151,20 @@ class _RegistrationScreenState
           '',
     );
 
-    /// Future Profile Fields
+    /// LOGIN AUTH DATA
+    await prefs.setString(
+      'user_email',
+      emailController.text
+          .trim(),
+    );
+
+    await prefs.setString(
+      'user_password',
+      passwordController.text
+          .trim(),
+    );
+
+    /// DEFAULT PROFILE DATA
     await prefs.setString(
       'bloodGroup',
       'None',
@@ -137,14 +178,23 @@ class _RegistrationScreenState
 
   @override
   void dispose() {
+
     fullNameController.dispose();
+
     emailController.dispose();
+
     phoneController.dispose();
+
     houseController.dispose();
+
     roadController.dispose();
+
     areaController.dispose();
+
     cityController.dispose();
+
     passwordController.dispose();
+
     confirmPasswordController
         .dispose();
 
@@ -154,36 +204,52 @@ class _RegistrationScreenState
   @override
   Widget build(
       BuildContext context) {
+
     return Scaffold(
+
       backgroundColor:
-          const Color(0xFFF6F6F6),
+          const Color(
+        0xFFF6F6F6,
+      ),
 
       appBar: AppBar(
-        title:
-            const Text("Create Account"),
+
+        title: const Text(
+          "Create Account",
+        ),
+
         backgroundColor:
-            const Color(0xFFE53935),
+            const Color(
+          0xFFE53935,
+        ),
       ),
 
       body:
           SingleChildScrollView(
+
         padding:
             const EdgeInsets.all(
-                24),
+          24,
+        ),
 
         child: Form(
+
           key: _formKey,
 
           child: Column(
             children: [
+
               /// FULL NAME
               _inputField(
                 controller:
                     fullNameController,
+
                 label:
                     "Full Name",
+
                 icon:
                     Icons.person,
+
                 requiredField:
                     true,
               ),
@@ -195,11 +261,16 @@ class _RegistrationScreenState
               _inputField(
                 controller:
                     emailController,
+
                 label: "Email",
+
                 icon:
                     Icons.email,
+
                 requiredField:
                     true,
+
+                isEmail: true,
               ),
 
               const SizedBox(
@@ -207,10 +278,14 @@ class _RegistrationScreenState
 
               /// DATE OF BIRTH
               GestureDetector(
+
                 onTap: pickDate,
+
                 child: Container(
+
                   width:
                       double.infinity,
+
                   padding:
                       const EdgeInsets
                           .symmetric(
@@ -220,24 +295,29 @@ class _RegistrationScreenState
 
                   decoration:
                       BoxDecoration(
+
                     color:
                         Colors.white,
+
                     borderRadius:
                         BorderRadius
                             .circular(
-                                12),
+                      12,
+                    ),
                   ),
 
                   child: Row(
                     children: [
+
                       const Icon(
-                          Icons.cake),
+                        Icons.cake,
+                      ),
 
                       const SizedBox(
-                          width:
-                              10),
+                          width: 10),
 
                       Text(
+
                         selectedDate ==
                                 null
                             ? "Select Date of Birth"
@@ -253,72 +333,101 @@ class _RegistrationScreenState
 
               /// GENDER
               Column(
+
                 crossAxisAlignment:
                     CrossAxisAlignment
                         .start,
+
                 children: [
-                  const Text(
-                    "Gender",
-                    style:
-                        TextStyle(
-                      fontWeight:
-                          FontWeight
-                              .bold,
+
+                  const Align(
+
+                    alignment:
+                        Alignment
+                            .centerLeft,
+
+                    child: Text(
+
+                      "Gender",
+
+                      style:
+                          TextStyle(
+
+                        fontWeight:
+                            FontWeight
+                                .bold,
+                      ),
                     ),
                   ),
 
                   Row(
                     children: [
+
                       Radio(
                         value:
                             "Male",
+
                         groupValue:
                             gender,
+
                         onChanged:
                             (value) {
-                          setState(
-                              () {
+
+                          setState(() {
+
                             gender =
                                 value;
                           });
                         },
                       ),
+
                       const Text(
-                          "Male"),
+                        "Male",
+                      ),
 
                       Radio(
                         value:
                             "Female",
+
                         groupValue:
                             gender,
+
                         onChanged:
                             (value) {
-                          setState(
-                              () {
+
+                          setState(() {
+
                             gender =
                                 value;
                           });
                         },
                       ),
+
                       const Text(
-                          "Female"),
+                        "Female",
+                      ),
 
                       Radio(
                         value:
                             "Other",
+
                         groupValue:
                             gender,
+
                         onChanged:
                             (value) {
-                          setState(
-                              () {
+
+                          setState(() {
+
                             gender =
                                 value;
                           });
                         },
                       ),
+
                       const Text(
-                          "Other"),
+                        "Other",
+                      ),
                     ],
                   ),
                 ],
@@ -329,12 +438,16 @@ class _RegistrationScreenState
 
               /// PHONE
               _inputField(
+
                 controller:
                     phoneController,
+
                 label:
                     "Phone Number",
+
                 icon:
                     Icons.phone,
+
                 requiredField:
                     true,
               ),
@@ -342,20 +455,22 @@ class _RegistrationScreenState
               const SizedBox(
                   height: 20),
 
-              /// ADDRESS
+              /// ADDRESS TITLE
               const Align(
+
                 alignment:
                     Alignment
                         .centerLeft,
+
                 child: Text(
+
                   "Address (Optional)",
-                  style:
-                      TextStyle(
+
+                  style: TextStyle(
                     fontWeight:
-                        FontWeight
-                            .bold,
-                    fontSize:
-                        16,
+                        FontWeight.bold,
+
+                    fontSize: 16,
                   ),
                 ),
               ),
@@ -367,8 +482,7 @@ class _RegistrationScreenState
                 controller:
                     houseController,
                 label: "House",
-                icon:
-                    Icons.home,
+                icon: Icons.home,
               ),
 
               const SizedBox(
@@ -378,8 +492,7 @@ class _RegistrationScreenState
                 controller:
                     roadController,
                 label: "Road",
-                icon:
-                    Icons.route,
+                icon: Icons.route,
               ),
 
               const SizedBox(
@@ -409,14 +522,20 @@ class _RegistrationScreenState
 
               /// PASSWORD
               _passwordField(
+
                 controller:
                     passwordController,
+
                 label:
                     "Create Password",
+
                 obscure:
                     obscurePassword,
+
                 toggle: () {
+
                   setState(() {
+
                     obscurePassword =
                         !obscurePassword;
                   });
@@ -428,14 +547,20 @@ class _RegistrationScreenState
 
               /// CONFIRM PASSWORD
               _passwordField(
+
                 controller:
                     confirmPasswordController,
+
                 label:
                     "Confirm Password",
+
                 obscure:
                     obscureConfirmPassword,
+
                 toggle: () {
+
                   setState(() {
+
                     obscureConfirmPassword =
                         !obscureConfirmPassword;
                   });
@@ -447,47 +572,61 @@ class _RegistrationScreenState
 
               /// REGISTER BUTTON
               SizedBox(
+
                 width:
                     double.infinity,
+
                 height: 50,
 
                 child:
                     ElevatedButton(
+
                   style:
                       ElevatedButton
                           .styleFrom(
+
                     backgroundColor:
                         const Color(
-                            0xFFE53935),
+                      0xFFE53935,
+                    ),
+
                     shape:
                         RoundedRectangleBorder(
+
                       borderRadius:
                           BorderRadius.circular(
-                              12),
+                        12,
+                      ),
                     ),
                   ),
 
                   onPressed:
                       () async {
+
                     if (!_formKey
                         .currentState!
                         .validate()) {
+
                       return;
                     }
 
                     if (selectedDate ==
                         null) {
+
                       _showSnackBar(
                         "Please select date of birth",
                       );
+
                       return;
                     }
 
                     if (gender ==
                         null) {
+
                       _showSnackBar(
                         "Please select gender",
                       );
+
                       return;
                     }
 
@@ -495,29 +634,43 @@ class _RegistrationScreenState
                             .text !=
                         confirmPasswordController
                             .text) {
+
                       _showSnackBar(
                         "Passwords do not match",
                       );
+
                       return;
                     }
 
+                    /// SAVE DATA
                     await saveUserData();
 
                     _showSnackBar(
                       "Registration Successful",
                     );
+
+                    /// GO LOGIN
+                    Navigator.pushReplacementNamed(
+                      context,
+                      AppRoutes.login,
+                    );
                   },
 
                   child:
                       const Text(
+
                     "Create Account",
-                    style:
-                        TextStyle(
-                      fontSize:
-                          16,
+
+                    style: TextStyle(
+
+                      fontSize: 16,
+
                       fontWeight:
                           FontWeight
                               .bold,
+
+                      color:
+                          Colors.white,
                     ),
                   ),
                 ),
@@ -526,34 +679,48 @@ class _RegistrationScreenState
               const SizedBox(
                   height: 20),
 
+              /// LOGIN
               Row(
+
                 mainAxisAlignment:
                     MainAxisAlignment
                         .center,
+
                 children: [
+
                   const Text(
                     "Already have an account? ",
                   ),
 
                   GestureDetector(
+
                     onTap: () {
+
                       Navigator.pop(
-                          context);
+                        context,
+                      );
                     },
+
                     child:
                         const Text(
+
                       "Login",
+
                       style:
                           TextStyle(
-                        color: Color(
-                            0xFFE53935),
+
+                        color:
+                            Color(
+                          0xFFE53935,
+                        ),
+
                         fontWeight:
                             FontWeight.bold,
                       ),
                     ),
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -561,73 +728,115 @@ class _RegistrationScreenState
     );
   }
 
+  /// SNACKBAR
   void _showSnackBar(
       String message) {
+
     ScaffoldMessenger.of(context)
         .showSnackBar(
+
       SnackBar(
         content: Text(message),
       ),
     );
   }
 
+  /// INPUT FIELD
   Widget _inputField({
+
     required TextEditingController
         controller,
+
     required String label,
+
     required IconData icon,
+
     bool requiredField =
         false,
+
+    bool isEmail = false,
+
   }) {
+
     return TextFormField(
+
       controller: controller,
 
       decoration:
           InputDecoration(
+
         labelText: label,
+
         prefixIcon:
             Icon(icon),
+
         filled: true,
+
         fillColor:
             Colors.white,
 
         border:
             OutlineInputBorder(
+
           borderRadius:
-              BorderRadius
-                  .circular(12),
+              BorderRadius.circular(
+            12,
+          ),
+
           borderSide:
               BorderSide.none,
         ),
       ),
 
       validator: (value) {
+
         if (requiredField &&
             (value == null ||
                 value
+                    .trim()
                     .isEmpty)) {
+
           return "$label is required";
         }
+
+        if (isEmail &&
+            value != null &&
+            !value.contains('@')) {
+
+          return "Enter valid email";
+        }
+
         return null;
       },
     );
   }
 
+  /// PASSWORD FIELD
   Widget _passwordField({
+
     required TextEditingController
         controller,
+
     required String label,
+
     required bool obscure,
+
     required VoidCallback
         toggle,
+
   }) {
+
     return TextFormField(
+
       controller: controller,
+
       obscureText: obscure,
 
       decoration:
           InputDecoration(
+
         labelText: label,
+
         prefixIcon:
             const Icon(
           Icons.lock,
@@ -635,37 +844,47 @@ class _RegistrationScreenState
 
         suffixIcon:
             IconButton(
+
           icon: Icon(
+
             obscure
                 ? Icons
                     .visibility_off
                 : Icons
                     .visibility,
           ),
+
           onPressed: toggle,
         ),
 
         filled: true,
+
         fillColor:
             Colors.white,
 
         border:
             OutlineInputBorder(
+
           borderRadius:
-              BorderRadius
-                  .circular(12),
+              BorderRadius.circular(
+            12,
+          ),
+
           borderSide:
               BorderSide.none,
         ),
       ),
 
       validator: (value) {
+
         if (value == null ||
             value.isEmpty) {
+
           return "$label required";
         }
 
         if (value.length < 6) {
+
           return "Password must be at least 6 characters";
         }
 
