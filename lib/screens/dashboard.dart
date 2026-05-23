@@ -1,13 +1,216 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes/screen_routes.dart';
-import 'emergency_request.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<DashboardScreen> createState() =>
+      _DashboardScreenState();
+}
+
+class _DashboardScreenState
+    extends State<DashboardScreen> {
+  String userName = "User";
+  Timer? _timer;
+
+  final List<Map<String, String>>
+      hospitals = [
+    {
+      "name":
+          "Dhaka Medical College Hospital",
+      "distance":
+          "2.5 Km away - Open 24/7"
+    },
+    {
+      "name": "Square Hospital",
+      "distance":
+          "3 Km away - Open 24/7"
+    },
+    {
+      "name":
+          "Evercare Hospital Dhaka",
+      "distance":
+          "4 Km away - Open 24/7"
+    },
+    {
+      "name": "United Hospital",
+      "distance":
+          "5 Km away - Open 24/7"
+    },
+    {
+      "name":
+          "Popular Diagnostic Center",
+      "distance":
+          "2 Km away - Open"
+    },
+    {
+      "name": "Ibn Sina Hospital",
+      "distance":
+          "3.2 Km away - Open"
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserName();
+
+    /// Refresh greeting every minute
+    _timer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) {
+        if (mounted) {
+          setState(() {});
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  /// Load username
+  Future<void> loadUserName() async {
+    final prefs =
+        await SharedPreferences
+            .getInstance();
+
+    if (!mounted) return;
+
+    final name =
+        prefs.getString('fullName');
+
+    setState(() {
+      userName =
+          (name != null &&
+                  name.trim().isNotEmpty)
+              ? name
+              : "User";
+    });
+  }
+
+  /// Greeting Logic
+  String getGreeting() {
+    final hour =
+        DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      return "Good Morning 👋";
+    } else if (hour >= 12 &&
+        hour < 17) {
+      return "Good Afternoon ☀️";
+    } else if (hour >= 17 &&
+        hour < 21) {
+      return "Good Evening 🌇";
+    } else {
+      return "Good Night 🌙";
+    }
+  }
+
+  /// Hospital Bottom Sheet
+  void showHospitals() {
+    showModalBottomSheet(
+      context: context,
+      shape:
+          const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
+      builder: (_) {
+        return Padding(
+          padding:
+              const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize:
+                MainAxisSize.min,
+            crossAxisAlignment:
+                CrossAxisAlignment
+                    .start,
+            children: [
+              const Text(
+                "Dhaka Hospitals",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight:
+                      FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(
+                  height: 15),
+
+              ...hospitals.map(
+                (h) => Card(
+                  child: ListTile(
+                    leading:
+                        const Icon(
+                      Icons
+                          .local_hospital,
+                      color:
+                          Colors.red,
+                    ),
+                    title: Text(
+                        h["name"]!),
+                    subtitle: Text(
+                        h["distance"]!),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateTo(int index) {
+    switch (index) {
+      case 0:
+        break;
+
+      case 1:
+        Navigator.pushNamed(
+          context,
+          AppRoutes
+              .emergencyRequest,
+        );
+        break;
+
+      case 2:
+        Navigator.pushNamed(
+          context,
+          AppRoutes.myRequest,
+        );
+        break;
+
+      case 3:
+        Navigator.pushNamed(
+          context,
+          AppRoutes.notification,
+        );
+        break;
+
+      case 4:
+        Navigator.pushNamed(
+          context,
+          AppRoutes.myProfile,
+        );
+        break;
+    }
+  }
+
+  @override
+  Widget build(
+      BuildContext context) {
     return Scaffold(
       backgroundColor:
           const Color(0xFFF7EFEF),
@@ -15,25 +218,25 @@ class DashboardScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-
-            /// HEADER
+            /// Header
             Container(
-              width: double.infinity,
+              width:
+                  double.infinity,
               padding:
-                  const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 15,
-                bottom: 28,
+                  const EdgeInsets
+                      .fromLTRB(
+                20,
+                15,
+                20,
+                28,
               ),
-
               decoration:
                   const BoxDecoration(
                 color:
                     Color(0xFFFF5757),
-
                 borderRadius:
-                    BorderRadius.only(
+                    BorderRadius
+                        .only(
                   bottomLeft:
                       Radius.circular(
                           22),
@@ -42,17 +245,15 @@ class DashboardScreen extends StatelessWidget {
                           22),
                 ),
               ),
-
-              child: const Column(
+              child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment
                         .start,
-
                 children: [
-
                   Text(
-                    'Welcome Dear',
-                    style: TextStyle(
+                    'Welcome $userName',
+                    style:
+                        const TextStyle(
                       color:
                           Colors.white,
                       fontSize: 24,
@@ -62,13 +263,15 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: 6),
+                  const SizedBox(
+                      height: 6),
 
-                  Text(
+                  const Text(
                     "Let’s make a difference together",
-                    style: TextStyle(
-                      color:
-                          Colors.white70,
+                    style:
+                        TextStyle(
+                      color: Colors
+                          .white70,
                       fontSize: 14,
                     ),
                   ),
@@ -80,20 +283,17 @@ class DashboardScreen extends StatelessWidget {
               child:
                   SingleChildScrollView(
                 padding:
-                    const EdgeInsets.all(
-                        16),
-
+                    const EdgeInsets
+                        .all(16),
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment
                           .start,
-
                   children: [
-
-                    /// GOOD MORNING
-                    const Text(
-                      'Good Morning 👋',
-                      style: TextStyle(
+                    Text(
+                      getGreeting(),
+                      style:
+                          const TextStyle(
                         fontSize: 24,
                         fontWeight:
                             FontWeight
@@ -106,58 +306,43 @@ class DashboardScreen extends StatelessWidget {
 
                     const Text(
                       "Don’t worry, We are always there for you",
-                      style: TextStyle(
-                        color:
-                            Colors.black54,
-                        fontSize: 14,
-                      ),
                     ),
 
                     const SizedBox(
                         height: 22),
 
-                    /// EMERGENCY CARD
+                    /// Emergency Card
                     Container(
-                      width:
-                          double.infinity,
-
+                      width: double
+                          .infinity,
                       padding:
                           const EdgeInsets
                               .all(16),
-
                       decoration:
                           BoxDecoration(
                         color:
                             const Color(
                                 0xFFF4EEEE),
-
                         borderRadius:
                             BorderRadius
                                 .circular(
                                     18),
                       ),
-
                       child: Row(
                         children: [
-
                           Expanded(
-                            child: Column(
+                            child:
+                                Column(
                               crossAxisAlignment:
                                   CrossAxisAlignment
                                       .start,
-
                               children: [
-
                                 const Text(
                                   'Emergency Donation Request',
-
                                   style:
                                       TextStyle(
                                     fontWeight:
-                                        FontWeight
-                                            .bold,
-                                    fontSize:
-                                        16,
+                                        FontWeight.bold,
                                   ),
                                 ),
 
@@ -167,12 +352,6 @@ class DashboardScreen extends StatelessWidget {
 
                                 const Text(
                                   'Urgent: Blood type A+ or kidney needed',
-
-                                  style:
-                                      TextStyle(
-                                    fontSize:
-                                        13,
-                                  ),
                                 ),
 
                                 const SizedBox(
@@ -183,36 +362,18 @@ class DashboardScreen extends StatelessWidget {
                                   style:
                                       ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        const Color(
-                                            0xFFFF5757),
-
-                                    shape:
-                                        RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              10),
-                                    ),
+                                        const Color(0xFFFF5757),
                                   ),
-
                                   onPressed:
                                       () {
-                                    Navigator.push(
+                                    Navigator.pushNamed(
                                       context,
-
-                                      MaterialPageRoute(
-                                        builder:
-                                            (
-                                              context,
-                                            ) =>
-                                                const EmergencyRequestScreen(),
-                                      ),
+                                      AppRoutes.emergencyRequest,
                                     );
                                   },
-
                                   child:
                                       const Text(
                                     'Respond to Request',
-
                                     style:
                                         TextStyle(
                                       color:
@@ -224,13 +385,10 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
 
-                          const SizedBox(
-                              width: 12),
-
                           Image.network(
                             'https://cdn-icons-png.flaticon.com/512/3209/3209265.png',
-
-                            height: 90,
+                            height:
+                                90,
                           ),
                         ],
                       ),
@@ -239,10 +397,10 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(
                         height: 30),
 
-                    /// QUICK ACTIONS
                     const Text(
                       'Quick Actions',
-                      style: TextStyle(
+                      style:
+                          TextStyle(
                         color:
                             Colors.grey,
                         fontWeight:
@@ -256,106 +414,50 @@ class DashboardScreen extends StatelessWidget {
                         height: 20),
 
                     GridView.count(
-                      shrinkWrap: true,
-
+                      shrinkWrap:
+                          true,
                       physics:
                           const NeverScrollableScrollPhysics(),
-
-                      crossAxisCount: 2,
-
+                      crossAxisCount:
+                          2,
                       crossAxisSpacing:
                           15,
-
                       mainAxisSpacing:
                           15,
-
                       childAspectRatio:
                           2.2,
-
                       children: [
-
-                        /// FIND DONOR
                         _quickAction(
-                          context,
-
-                          icon:
-                              Icons.search,
-
-                          title:
-                              'Find Donors',
-
-                          onTap: () {
-                            ScaffoldMessenger.of(
-                                    context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Find Donor Coming Soon',
-                                ),
-                              ),
-                            );
-                          },
+                          Icons.search,
+                          'Find Donors',
+                          () {},
                         ),
-
-                        /// BOOK REQUEST
                         _quickAction(
-                          context,
-
-                          icon:
-                              Icons.bloodtype,
-
-                          title:
-                              'Book Request',
-
-                          onTap: () {
+                          Icons
+                              .bloodtype,
+                          'Book Request',
+                          () {
                             Navigator.pushNamed(
                               context,
-                              AppRoutes
-                                  .emergencyRequest,
+                              AppRoutes.emergencyRequest,
                             );
                           },
                         ),
-
-                        /// MY REQUEST
                         _quickAction(
-                          context,
-
-                          icon: Icons
+                          Icons
                               .warning_amber_rounded,
-
-                          title:
-                              'My Request',
-
-                          onTap: () {
+                          'My Request',
+                          () {
                             Navigator.pushNamed(
                               context,
-                              AppRoutes
-                                  .myRequest,
+                              AppRoutes.myRequest,
                             );
                           },
                         ),
-
-                        /// CENTER
                         _quickAction(
-                          context,
-
-                          icon:
-                              Icons.phone,
-
-                          title:
-                              'Center',
-
-                          onTap: () {
-                            ScaffoldMessenger.of(
-                                    context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Center List Coming Soon',
-                                ),
-                              ),
-                            );
-                          },
+                          Icons.phone,
+                          'Center',
+                          () {},
                         ),
                       ],
                     ),
@@ -363,17 +465,13 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(
                         height: 30),
 
-                    /// NEARBY HOSPITAL
                     Row(
                       mainAxisAlignment:
                           MainAxisAlignment
                               .spaceBetween,
-
                       children: [
-
                         const Text(
                           'Nearby Hospital',
-
                           style:
                               TextStyle(
                             color:
@@ -385,118 +483,25 @@ class DashboardScreen extends StatelessWidget {
                                 18,
                           ),
                         ),
-
                         TextButton(
                           onPressed:
-                              () {},
-
+                              showHospitals,
                           child:
                               const Text(
                             'See All >',
-
                             style:
                                 TextStyle(
                               color:
                                   Colors.red,
-                              fontWeight:
-                                  FontWeight
-                                      .bold,
                             ),
                           ),
                         ),
                       ],
                     ),
 
-                    Container(
-                      padding:
-                          const EdgeInsets
-                              .all(14),
-
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            const Color(
-                                0xFFF0EAEA),
-
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                                    12),
-                      ),
-
-                      child: Row(
-                        children: [
-
-                          const CircleAvatar(
-                            radius: 26,
-
-                            backgroundColor:
-                                Colors.white,
-
-                            child: Icon(
-                              Icons
-                                  .local_hospital,
-
-                              color:
-                                  Colors.red,
-
-                              size: 30,
-                            ),
-                          ),
-
-                          const SizedBox(
-                              width: 12),
-
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
-
-                              children: [
-
-                                Text(
-                                  'City Hospital',
-
-                                  style:
-                                      TextStyle(
-                                    fontWeight:
-                                        FontWeight
-                                            .bold,
-                                    fontSize:
-                                        15,
-                                  ),
-                                ),
-
-                                SizedBox(
-                                    height:
-                                        5),
-
-                                Text(
-                                  '2 Km away - Open 24/7',
-
-                                  style:
-                                      TextStyle(
-                                    color:
-                                        Colors.grey,
-                                    fontSize:
-                                        12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const Icon(
-                            Icons.add,
-
-                            color:
-                                Colors.red,
-
-                            size: 30,
-                          ),
-                        ],
-                      ),
+                    hospitalCard(
+                      "Square Hospital",
+                      "3 Km away - Open 24/7",
                     ),
                   ],
                 ),
@@ -506,145 +511,130 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
 
-      /// BOTTOM NAVIGATION
       bottomNavigationBar:
           BottomNavigationBar(
         currentIndex: 0,
-
+        selectedItemColor:
+            Colors.red,
+        unselectedItemColor:
+            Colors.grey,
         type:
             BottomNavigationBarType
                 .fixed,
-
-        selectedItemColor:
-            Colors.red,
-
-        unselectedItemColor:
-            Colors.grey,
-
-        showSelectedLabels:
-            false,
-
-        showUnselectedLabels:
-            false,
-
-        onTap: (index) {
-
-          /// HOME
-          if (index == 0) {}
-
-          /// REQUEST
-          else if (index == 1) {
-            Navigator.pushNamed(
-              context,
-              AppRoutes
-                  .emergencyRequest,
-            );
-          }
-
-          /// MY REQUEST
-          else if (index == 2) {
-            Navigator.pushNamed(
-              context,
-              AppRoutes.myRequest,
-            );
-          }
-
-          /// PROFILE
-          else if (index == 3) {
-            Navigator.pushNamed(
-              context,
-              AppRoutes.myProfile,
-            );
-          }
-        },
-
+        onTap: _navigateTo,
         items: const [
-
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
           BottomNavigationBarItem(
             icon:
-                Icon(Icons.home),
-            label: '',
+                Icon(Icons.bloodtype),
+            label: 'Request',
           ),
-
-          BottomNavigationBarItem(
-            icon:
-                Icon(Icons.edit_note),
-            label: '',
-          ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
-            label: '',
+            label: 'My Request',
           ),
-
+          BottomNavigationBarItem(
+            icon: Icon(
+                Icons.notifications),
+            label: 'Notification',
+          ),
           BottomNavigationBarItem(
             icon:
                 Icon(Icons.person),
-            label: '',
+            label: 'Profile',
           ),
         ],
       ),
     );
   }
 
-  /// QUICK ACTION WIDGET
+  Widget hospitalCard(
+      String title,
+      String subtitle) {
+    return Container(
+      padding:
+          const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color:
+            const Color(0xFFF0EAEA),
+        borderRadius:
+            BorderRadius.circular(
+                12),
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            backgroundColor:
+                Colors.white,
+            child: Icon(
+              Icons.local_hospital,
+              color: Colors.red,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment
+                      .start,
+              children: [
+                Text(
+                  title,
+                  style:
+                      const TextStyle(
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+                ),
+                Text(subtitle),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _quickAction(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return InkWell(
-      borderRadius:
-          BorderRadius.circular(16),
-
       onTap: onTap,
-
+      borderRadius:
+          BorderRadius.circular(
+              16),
       child: Container(
         padding:
             const EdgeInsets.all(
                 14),
-
-        decoration: BoxDecoration(
+        decoration:
+            BoxDecoration(
           color: Colors.white,
-
           borderRadius:
               BorderRadius.circular(
                   16),
-
-          boxShadow: [
-
-            BoxShadow(
-              color: Colors.black
-                  .withOpacity(0.05),
-
-              blurRadius: 8,
-            ),
-          ],
         ),
-
         child: Row(
           children: [
-
             Icon(
               icon,
               size: 35,
               color: Colors.red,
             ),
-
             const SizedBox(
                 width: 10),
-
             Expanded(
               child: Text(
                 title,
-
                 style:
                     const TextStyle(
                   fontWeight:
                       FontWeight.bold,
-                  fontSize: 16,
                 ),
               ),
             ),

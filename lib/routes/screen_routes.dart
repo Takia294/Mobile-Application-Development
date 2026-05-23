@@ -8,14 +8,13 @@ import '../screens/dashboard.dart';
 import '../screens/emergency_request.dart';
 import '../screens/myprofile.dart';
 import '../screens/my_request.dart';
+import '../screens/notification.dart'; // ADD THIS
 
 class AppRoutes {
-
   /// ROUTE NAMES
   static const String splash = '/';
 
-  static const String login =
-      '/login';
+  static const String login = '/login';
 
   static const String registration =
       '/registration';
@@ -32,10 +31,12 @@ class AppRoutes {
   static const String myRequest =
       '/my-request';
 
+  static const String notification =
+      '/notification';
+
   /// GENERATE ROUTE
   static Route<dynamic> generateRoute(
       RouteSettings settings) {
-
     switch (settings.name) {
 
       /// SPLASH
@@ -85,6 +86,13 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) =>
               const MyRequestScreen(),
+        );
+
+      /// NOTIFICATION
+      case notification:
+        return MaterialPageRoute(
+          builder: (_) =>
+              const NotificationScreen(),
         );
 
       /// DEFAULT ERROR
