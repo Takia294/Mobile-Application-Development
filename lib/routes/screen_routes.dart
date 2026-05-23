@@ -8,13 +8,15 @@ import '../screens/dashboard.dart';
 import '../screens/emergency_request.dart';
 import '../screens/myprofile.dart';
 import '../screens/my_request.dart';
-import '../screens/notification.dart'; // ADD THIS
+import '../screens/notification.dart';
+import '../screens/find_donor.dart'; // NEW
 
 class AppRoutes {
   /// ROUTE NAMES
   static const String splash = '/';
 
-  static const String login = '/login';
+  static const String login =
+      '/login';
 
   static const String registration =
       '/registration';
@@ -34,9 +36,13 @@ class AppRoutes {
   static const String notification =
       '/notification';
 
+  static const String findDonor =
+      '/find-donor'; // NEW
+
   /// GENERATE ROUTE
   static Route<dynamic> generateRoute(
-      RouteSettings settings) {
+    RouteSettings settings,
+  ) {
     switch (settings.name) {
 
       /// SPLASH
@@ -74,6 +80,13 @@ class AppRoutes {
               const EmergencyRequestScreen(),
         );
 
+      /// FIND DONOR
+      case findDonor:
+        return MaterialPageRoute(
+          builder: (_) =>
+              const FindDonorScreen(),
+        );
+
       /// MY PROFILE
       case myProfile:
         return MaterialPageRoute(
@@ -98,7 +111,8 @@ class AppRoutes {
       /// DEFAULT ERROR
       default:
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
+          builder: (_) =>
+              const Scaffold(
             body: Center(
               child: Text(
                 'No route found',

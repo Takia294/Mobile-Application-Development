@@ -59,7 +59,6 @@ class _DashboardScreenState
     super.initState();
     loadUserName();
 
-    /// Refresh greeting every minute
     _timer = Timer.periodic(
       const Duration(minutes: 1),
       (_) {
@@ -76,7 +75,7 @@ class _DashboardScreenState
     super.dispose();
   }
 
-  /// Load username
+  /// LOAD USER NAME
   Future<void> loadUserName() async {
     final prefs =
         await SharedPreferences
@@ -96,7 +95,7 @@ class _DashboardScreenState
     });
   }
 
-  /// Greeting Logic
+  /// GREETING
   String getGreeting() {
     final hour =
         DateTime.now().hour;
@@ -114,7 +113,7 @@ class _DashboardScreenState
     }
   }
 
-  /// Hospital Bottom Sheet
+  /// HOSPITAL SHEET
   void showHospitals() {
     showModalBottomSheet(
       context: context,
@@ -144,12 +143,11 @@ class _DashboardScreenState
                       FontWeight.bold,
                 ),
               ),
-
               const SizedBox(
                   height: 15),
 
               ...hospitals.map(
-                (h) => Card(
+                (hospital) => Card(
                   child: ListTile(
                     leading:
                         const Icon(
@@ -159,9 +157,13 @@ class _DashboardScreenState
                           Colors.red,
                     ),
                     title: Text(
-                        h["name"]!),
+                      hospital[
+                          "name"]!,
+                    ),
                     subtitle: Text(
-                        h["distance"]!),
+                      hospital[
+                          "distance"]!,
+                    ),
                   ),
                 ),
               ),
@@ -172,13 +174,14 @@ class _DashboardScreenState
     );
   }
 
+  /// NAVIGATION
   void _navigateTo(int index) {
     switch (index) {
       case 0:
         break;
 
       case 1:
-        Navigator.pushNamed(
+        Navigator.pushReplacementNamed(
           context,
           AppRoutes
               .emergencyRequest,
@@ -186,21 +189,21 @@ class _DashboardScreenState
         break;
 
       case 2:
-        Navigator.pushNamed(
+        Navigator.pushReplacementNamed(
           context,
           AppRoutes.myRequest,
         );
         break;
 
       case 3:
-        Navigator.pushNamed(
+        Navigator.pushReplacementNamed(
           context,
           AppRoutes.notification,
         );
         break;
 
       case 4:
-        Navigator.pushNamed(
+        Navigator.pushReplacementNamed(
           context,
           AppRoutes.myProfile,
         );
@@ -218,7 +221,7 @@ class _DashboardScreenState
       body: SafeArea(
         child: Column(
           children: [
-            /// Header
+            /// HEADER
             Container(
               width:
                   double.infinity,
@@ -235,8 +238,7 @@ class _DashboardScreenState
                 color:
                     Color(0xFFFF5757),
                 borderRadius:
-                    BorderRadius
-                        .only(
+                    BorderRadius.only(
                   bottomLeft:
                       Radius.circular(
                           22),
@@ -262,10 +264,8 @@ class _DashboardScreenState
                               .w600,
                     ),
                   ),
-
                   const SizedBox(
                       height: 6),
-
                   const Text(
                     "Let’s make a difference together",
                     style:
@@ -311,7 +311,7 @@ class _DashboardScreenState
                     const SizedBox(
                         height: 22),
 
-                    /// Emergency Card
+                    /// EMERGENCY CARD
                     Container(
                       width: double
                           .infinity,
@@ -362,7 +362,8 @@ class _DashboardScreenState
                                   style:
                                       ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        const Color(0xFFFF5757),
+                                        const Color(
+                                            0xFFFF5757),
                                   ),
                                   onPressed:
                                       () {
@@ -397,6 +398,7 @@ class _DashboardScreenState
                     const SizedBox(
                         height: 30),
 
+                    /// QUICK ACTIONS
                     const Text(
                       'Quick Actions',
                       style:
@@ -430,8 +432,14 @@ class _DashboardScreenState
                         _quickAction(
                           Icons.search,
                           'Find Donors',
-                          () {},
+                          () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.findDonor,
+                            );
+                          },
                         ),
+
                         _quickAction(
                           Icons
                               .bloodtype,
@@ -443,6 +451,7 @@ class _DashboardScreenState
                             );
                           },
                         ),
+
                         _quickAction(
                           Icons
                               .warning_amber_rounded,
@@ -454,6 +463,7 @@ class _DashboardScreenState
                             );
                           },
                         ),
+
                         _quickAction(
                           Icons.phone,
                           'Center',
@@ -465,6 +475,7 @@ class _DashboardScreenState
                     const SizedBox(
                         height: 30),
 
+                    /// HOSPITAL
                     Row(
                       mainAxisAlignment:
                           MainAxisAlignment
@@ -539,7 +550,8 @@ class _DashboardScreenState
           BottomNavigationBarItem(
             icon: Icon(
                 Icons.notifications),
-            label: 'Notification',
+            label:
+                'Notification',
           ),
           BottomNavigationBarItem(
             icon:
@@ -552,8 +564,9 @@ class _DashboardScreenState
   }
 
   Widget hospitalCard(
-      String title,
-      String subtitle) {
+    String title,
+    String subtitle,
+  ) {
     return Container(
       padding:
           const EdgeInsets.all(14),
@@ -574,7 +587,8 @@ class _DashboardScreenState
               color: Colors.red,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(
+              width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment:
