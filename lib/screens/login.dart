@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../routes/screen_routes.dart';
 import 'registration.dart';
@@ -17,6 +17,8 @@ class _LoginScreenState
 
   bool obscurePassword = true;
 
+  bool isLoading = false;
+
   final emailController =
       TextEditingController();
 
@@ -33,7 +35,7 @@ class _LoginScreenState
     super.dispose();
   }
 
-  /// LOGIN FUNCTION
+  /// FIREBASE LOGIN
   Future<void> loginUser() async {
 
     String email =
@@ -54,17 +56,16 @@ class _LoginScreenState
     }
 
     /// EMAIL FORMAT CHECK
-    if (!email.contains('@') &&
-        email.length < 11) {
+    if (!email.contains('@')) {
 
       _showMessage(
-        'Enter valid email or phone number',
+        'Enter valid email',
       );
 
       return;
     }
 
-    /// PASSWORD LENGTH
+    /// PASSWORD LENGTH CHECK
     if (password.length < 6) {
 
       _showMessage(
@@ -74,58 +75,86 @@ class _LoginScreenState
       return;
     }
 
-    /// GET SAVED DATA
-    final prefs =
-        await SharedPreferences
-            .getInstance();
+    setState(() {
+      isLoading = true;
+    });
 
-    String savedEmail =
-        prefs.getString(
-              'user_email',
-            ) ??
-            '';
+    try {
 
-    String savedPassword =
-        prefs.getString(
-              'user_password',
-            ) ??
-            '';
-
-    /// AUTH CHECK
-    if (email == savedEmail &&
-        password ==
-            savedPassword) {
-
-      /// SAVE LOGIN STATE
-      await prefs.setBool(
-        'is_logged_in',
-        true,
+      /// FIREBASE AUTH LOGIN
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      /// SUCCESS
+      if (!mounted) return;
+
+      /// SUCCESS MESSAGE
       ScaffoldMessenger.of(context)
           .showSnackBar(
         const SnackBar(
-          backgroundColor:
-              Colors.green,
+          backgroundColor: Colors.green,
           content: Text(
             'Login Successful',
           ),
         ),
       );
 
+      /// GO DASHBOARD
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.dashboard,
       );
+
     }
 
-    else {
+    on FirebaseAuthException catch (e) {
+
+      String message =
+          'Login Failed';
+
+      if (e.code ==
+          'user-not-found') {
+
+        message =
+            'No user found with this email';
+      }
+
+      else if (e.code ==
+          'wrong-password') {
+
+        message =
+            'Incorrect password';
+      }
+
+      else if (e.code ==
+          'invalid-email') {
+
+        message =
+            'Invalid email format';
+      }
+
+      else if (e.code ==
+          'invalid-credential') {
+
+        message =
+            'Invalid email or password';
+      }
+
+      _showMessage(message);
+    }
+
+    catch (e) {
 
       _showMessage(
-        'Invalid email or password',
+        'Something went wrong',
       );
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   /// SHOW MESSAGE
@@ -144,6 +173,7 @@ class _LoginScreenState
   Widget build(BuildContext context) {
 
     return Scaffold(
+
       backgroundColor:
           const Color(0xFFF6F6F6),
 
@@ -195,6 +225,7 @@ class _LoginScreenState
               ),
 
               child: Column(
+
                 crossAxisAlignment:
                     CrossAxisAlignment
                         .center,
@@ -213,7 +244,7 @@ class _LoginScreenState
                   const SizedBox(
                       height: 30),
 
-                  /// WELCOME
+                  /// TITLE
                   RichText(
                     text:
                         const TextSpan(
@@ -263,22 +294,23 @@ class _LoginScreenState
                   const SizedBox(
                       height: 30),
 
-                  /// EMAIL
+                  /// EMAIL FIELD
                   _inputField(
+
                     controller:
                         emailController,
 
                     hint:
-                        "Email or Phone Number",
+                        "Email",
 
                     icon: Icons
-                        .person_outline,
+                        .email_outlined,
                   ),
 
                   const SizedBox(
                       height: 15),
 
-                  /// PASSWORD
+                  /// PASSWORD FIELD
                   TextField(
 
                     controller:
@@ -408,26 +440,33 @@ class _LoginScreenState
                       ),
 
                       onPressed:
-                          loginUser,
+                          isLoading
+                              ? null
+                              : loginUser,
 
                       child:
-                          const Text(
+                          isLoading
+                              ? const CircularProgressIndicator(
+                                  color:
+                                      Colors.white,
+                                )
+                              : const Text(
 
-                        "Login",
+                                  "Login",
 
-                        style:
-                            TextStyle(
+                                  style:
+                                      TextStyle(
 
-                          fontSize: 16,
+                                    fontSize: 16,
 
-                          fontWeight:
-                              FontWeight
-                                  .bold,
+                                    fontWeight:
+                                        FontWeight
+                                            .bold,
 
-                          color:
-                              Colors.white,
-                        ),
-                      ),
+                                    color:
+                                        Colors.white,
+                                  ),
+                                ),
                     ),
                   ),
 
@@ -517,6 +556,7 @@ class _LoginScreenState
 
                   /// SIGN UP
                   Row(
+
                     mainAxisAlignment:
                         MainAxisAlignment
                             .center,

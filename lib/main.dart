@@ -1,31 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'firebase_options.dart';
 import 'routes/screen_routes.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    /// FIREBASE INITIALIZE
+    await Firebase.initializeApp(
+      options:
+          DefaultFirebaseOptions
+              .currentPlatform,
+    );
+  } catch (e) {
+    debugPrint(
+      'Firebase Init Error: $e',
+    );
+  }
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp
+    extends StatelessWidget {
+  const MyApp({
+    super.key,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner:
+          false,
 
       title: 'LifeLink',
 
       theme: ThemeData(
-        primarySwatch: Colors.red,
-        scaffoldBackgroundColor: const Color(0xFFF6F6F6),
-        fontFamily: 'Roboto',
+        primarySwatch:
+            Colors.red,
+
+        scaffoldBackgroundColor:
+            const Color(
+          0xFFF6F6F6,
+        ),
+
+        fontFamily:
+            'Roboto',
+
+        useMaterial3:
+            true,
       ),
 
-      initialRoute: AppRoutes.splash,
+      /// START SCREEN
+      initialRoute:
+          AppRoutes.splash,
 
-      onGenerateRoute: AppRoutes.generateRoute,
+      /// ROUTES
+      onGenerateRoute:
+          AppRoutes
+              .generateRoute,
     );
   }
 }

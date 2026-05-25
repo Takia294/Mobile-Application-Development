@@ -14,39 +14,49 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState
     extends State<DashboardScreen> {
+
   String userName = "User";
+
   Timer? _timer;
+
+  int currentIndex = 0;
 
   final List<Map<String, String>>
       hospitals = [
+
     {
       "name":
           "Dhaka Medical College Hospital",
       "distance":
           "2.5 Km away - Open 24/7"
     },
+
     {
       "name": "Square Hospital",
       "distance":
           "3 Km away - Open 24/7"
     },
+
     {
       "name":
           "Evercare Hospital Dhaka",
       "distance":
           "4 Km away - Open 24/7"
     },
+
     {
       "name": "United Hospital",
       "distance":
           "5 Km away - Open 24/7"
     },
+
     {
       "name":
           "Popular Diagnostic Center",
       "distance":
           "2 Km away - Open"
     },
+
     {
       "name": "Ibn Sina Hospital",
       "distance":
@@ -57,8 +67,10 @@ class _DashboardScreenState
   @override
   void initState() {
     super.initState();
+
     loadUserName();
 
+    /// REAL TIME GREETING UPDATE
     _timer = Timer.periodic(
       const Duration(minutes: 1),
       (_) {
@@ -77,92 +89,131 @@ class _DashboardScreenState
 
   /// LOAD USER NAME
   Future<void> loadUserName() async {
+
     final prefs =
         await SharedPreferences
             .getInstance();
 
-    if (!mounted) return;
-
     final name =
-        prefs.getString('fullName');
+        prefs.getString(
+              'fullName',
+            ) ??
+            "User";
 
-    setState(() {
-      userName =
-          (name != null &&
-                  name.trim().isNotEmpty)
-              ? name
-              : "User";
-    });
+    if (mounted) {
+
+      setState(() {
+
+        userName = name;
+      });
+    }
   }
 
-  /// GREETING
+  /// GREETING FUNCTION
   String getGreeting() {
+
     final hour =
         DateTime.now().hour;
 
-    if (hour >= 5 && hour < 12) {
+    if (hour >= 5 &&
+        hour < 12) {
+
       return "Good Morning 👋";
-    } else if (hour >= 12 &&
+    }
+
+    else if (hour >= 12 &&
         hour < 17) {
+
       return "Good Afternoon ☀️";
-    } else if (hour >= 17 &&
+    }
+
+    else if (hour >= 17 &&
         hour < 21) {
+
       return "Good Evening 🌇";
-    } else {
+    }
+
+    else {
+
       return "Good Night 🌙";
     }
   }
 
-  /// HOSPITAL SHEET
+  /// SHOW HOSPITAL LIST
   void showHospitals() {
+
     showModalBottomSheet(
+
       context: context,
+
+      backgroundColor:
+          Colors.white,
+
       shape:
           const RoundedRectangleBorder(
+
         borderRadius:
             BorderRadius.vertical(
-          top: Radius.circular(20),
+
+          top: Radius.circular(25),
         ),
       ),
-      builder: (_) {
+
+      builder: (context) {
+
         return Padding(
+
           padding:
               const EdgeInsets.all(16),
+
           child: Column(
+
             mainAxisSize:
                 MainAxisSize.min,
+
             crossAxisAlignment:
-                CrossAxisAlignment
-                    .start,
+                CrossAxisAlignment.start,
+
             children: [
-              const Text(
-                "Dhaka Hospitals",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight:
-                      FontWeight.bold,
+
+              const Center(
+                child: Text(
+                  "Dhaka Hospitals",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
                 ),
               ),
-              const SizedBox(
-                  height: 15),
+
+              const SizedBox(height: 20),
 
               ...hospitals.map(
                 (hospital) => Card(
+
+                  elevation: 2,
+
                   child: ListTile(
+
                     leading:
-                        const Icon(
-                      Icons
-                          .local_hospital,
-                      color:
-                          Colors.red,
+                        const CircleAvatar(
+
+                      backgroundColor:
+                          Color(0xFFFFEBEE),
+
+                      child: Icon(
+                        Icons.local_hospital,
+                        color: Colors.red,
+                      ),
                     ),
+
                     title: Text(
-                      hospital[
-                          "name"]!,
+                      hospital["name"]!,
                     ),
+
                     subtitle: Text(
-                      hospital[
-                          "distance"]!,
+                      hospital["distance"]!,
                     ),
                   ),
                 ),
@@ -174,99 +225,124 @@ class _DashboardScreenState
     );
   }
 
-  /// NAVIGATION
-  void _navigateTo(int index) {
-    switch (index) {
-      case 0:
-        break;
+  /// BOTTOM NAVIGATION
+  void _navigate(int index) {
 
-      case 1:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes
-              .emergencyRequest,
-        );
-        break;
+    setState(() {
 
-      case 2:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.myRequest,
-        );
-        break;
+      currentIndex = index;
+    });
 
-      case 3:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.notification,
-        );
-        break;
+    if (index == 0) {
 
-      case 4:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.myProfile,
-        );
-        break;
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.dashboard,
+      );
+    }
+
+    else if (index == 1) {
+
+      Navigator.pushNamed(
+        context,
+        AppRoutes.emergencyRequest,
+      );
+    }
+
+    else if (index == 2) {
+
+      Navigator.pushNamed(
+        context,
+        AppRoutes.myRequest,
+      );
+    }
+
+    else if (index == 3) {
+
+      Navigator.pushNamed(
+        context,
+        AppRoutes.notification,
+      );
+    }
+
+    else if (index == 4) {
+
+      Navigator.pushNamed(
+        context,
+        AppRoutes.myProfile,
+      );
     }
   }
 
   @override
-  Widget build(
-      BuildContext context) {
+  Widget build(BuildContext context) {
+
     return Scaffold(
+
       backgroundColor:
           const Color(0xFFF7EFEF),
 
       body: SafeArea(
+
         child: Column(
+
           children: [
             /// HEADER
             Container(
-              width:
-                  double.infinity,
+
+              width: double.infinity,
+
               padding:
-                  const EdgeInsets
-                      .fromLTRB(
-                20,
-                15,
-                20,
-                28,
+                  const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 15,
+                bottom: 28,
               ),
+
               decoration:
                   const BoxDecoration(
+
                 color:
                     Color(0xFFFF5757),
+
                 borderRadius:
                     BorderRadius.only(
+
                   bottomLeft:
-                      Radius.circular(
-                          22),
+                      Radius.circular(22),
+
                   bottomRight:
-                      Radius.circular(
-                          22),
+                      Radius.circular(22),
                 ),
               ),
+
               child: Column(
+
                 crossAxisAlignment:
                     CrossAxisAlignment
                         .start,
                 children: [
                   Text(
+
                     'Welcome $userName',
-                    style:
-                        const TextStyle(
-                      color:
-                          Colors.white,
+
+                    style: const TextStyle(
+
+                      color: Colors.white,
+
                       fontSize: 24,
+
                       fontWeight:
                           FontWeight
                               .w600,
                     ),
                   ),
-                  const SizedBox(
-                      height: 6),
+
+                  const SizedBox(height: 6),
+
                   const Text(
+
                     "Let’s make a difference together",
                     style:
                         TextStyle(
@@ -280,21 +356,28 @@ class _DashboardScreenState
             ),
 
             Expanded(
-              child:
-                  SingleChildScrollView(
+
+              child: SingleChildScrollView(
+
                 padding:
                     const EdgeInsets
                         .all(16),
                 child: Column(
+
                   crossAxisAlignment:
                       CrossAxisAlignment
                           .start,
                   children: [
+
+                    /// GREETING
                     Text(
+
                       getGreeting(),
-                      style:
-                          const TextStyle(
+
+                      style: const TextStyle(
+
                         fontSize: 24,
+
                         fontWeight:
                             FontWeight
                                 .bold,
@@ -305,6 +388,7 @@ class _DashboardScreenState
                         height: 5),
 
                     const Text(
+
                       "Don’t worry, We are always there for you",
                     ),
 
@@ -313,13 +397,15 @@ class _DashboardScreenState
 
                     /// EMERGENCY CARD
                     Container(
-                      width: double
-                          .infinity,
+
+                      width: double.infinity,
+
                       padding:
-                          const EdgeInsets
-                              .all(16),
+                          const EdgeInsets.all(16),
+
                       decoration:
                           BoxDecoration(
+
                         color:
                             const Color(
                                 0xFFF4EEEE),
@@ -329,20 +415,26 @@ class _DashboardScreenState
                                     18),
                       ),
                       child: Row(
+
                         children: [
                           Expanded(
-                            child:
-                                Column(
+
+                            child: Column(
+
                               crossAxisAlignment:
                                   CrossAxisAlignment
                                       .start,
                               children: [
                                 const Text(
+
                                   'Emergency Donation Request',
-                                  style:
-                                      TextStyle(
+
+                                  style: TextStyle(
+
                                     fontWeight:
                                         FontWeight.bold,
+
+                                    fontSize: 16,
                                   ),
                                 ),
 
@@ -359,26 +451,35 @@ class _DashboardScreenState
                                         14),
 
                                 ElevatedButton(
+
                                   style:
                                       ElevatedButton.styleFrom(
+
                                     backgroundColor:
-                                        const Color(
-                                            0xFFFF5757),
+                                        const Color(0xFFFF5757),
+
+                                    shape:
+                                        RoundedRectangleBorder(
+
+                                      borderRadius:
+                                          BorderRadius.circular(10),
+                                    ),
                                   ),
-                                  onPressed:
-                                      () {
+
+                                  onPressed: () {
+
                                     Navigator.pushNamed(
                                       context,
                                       AppRoutes.emergencyRequest,
                                     );
                                   },
-                                  child:
-                                      const Text(
+
+                                  child: const Text(
+
                                     'Respond to Request',
-                                    style:
-                                        TextStyle(
-                                      color:
-                                          Colors.white,
+
+                                    style: TextStyle(
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
@@ -387,9 +488,10 @@ class _DashboardScreenState
                           ),
 
                           Image.network(
+
                             'https://cdn-icons-png.flaticon.com/512/3209/3209265.png',
-                            height:
-                                90,
+
+                            height: 90,
                           ),
                         ],
                       ),
@@ -400,14 +502,16 @@ class _DashboardScreenState
 
                     /// QUICK ACTIONS
                     const Text(
+
                       'Quick Actions',
-                      style:
-                          TextStyle(
-                        color:
-                            Colors.grey,
+
+                      style: TextStyle(
+
+                        color: Colors.grey,
+
                         fontWeight:
-                            FontWeight
-                                .bold,
+                            FontWeight.bold,
+
                         fontSize: 18,
                       ),
                     ),
@@ -416,23 +520,30 @@ class _DashboardScreenState
                         height: 20),
 
                     GridView.count(
-                      shrinkWrap:
-                          true,
+
+                      shrinkWrap: true,
+
                       physics:
                           const NeverScrollableScrollPhysics(),
-                      crossAxisCount:
-                          2,
-                      crossAxisSpacing:
-                          15,
-                      mainAxisSpacing:
-                          15,
-                      childAspectRatio:
-                          2.2,
+
+                      crossAxisCount: 2,
+
+                      crossAxisSpacing: 15,
+
+                      mainAxisSpacing: 15,
+
+                      childAspectRatio: 2.2,
+
                       children: [
+
                         _quickAction(
-                          Icons.search,
-                          'Find Donors',
-                          () {
+
+                          icon: Icons.search,
+
+                          title: 'Find Donors',
+
+                          onTap: () {
+
                             Navigator.pushNamed(
                               context,
                               AppRoutes.findDonor,
@@ -441,10 +552,13 @@ class _DashboardScreenState
                         ),
 
                         _quickAction(
-                          Icons
-                              .bloodtype,
-                          'Book Request',
-                          () {
+
+                          icon: Icons.bloodtype,
+
+                          title: 'Book Request',
+
+                          onTap: () {
+
                             Navigator.pushNamed(
                               context,
                               AppRoutes.emergencyRequest,
@@ -453,10 +567,14 @@ class _DashboardScreenState
                         ),
 
                         _quickAction(
-                          Icons
-                              .warning_amber_rounded,
-                          'My Request',
-                          () {
+
+                          icon:
+                              Icons.warning_amber_rounded,
+
+                          title: 'My Request',
+
+                          onTap: () {
+
                             Navigator.pushNamed(
                               context,
                               AppRoutes.myRequest,
@@ -465,9 +583,23 @@ class _DashboardScreenState
                         ),
 
                         _quickAction(
-                          Icons.phone,
-                          'Center',
-                          () {},
+
+                          icon: Icons.phone,
+
+                          title: 'Center',
+
+                          onTap: () {
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(
+
+                              const SnackBar(
+                                content: Text(
+                                  'Center List Coming Soon',
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -475,35 +607,41 @@ class _DashboardScreenState
                     const SizedBox(
                         height: 30),
 
-                    /// HOSPITAL
+                    /// HOSPITAL SECTION
                     Row(
+
                       mainAxisAlignment:
                           MainAxisAlignment
                               .spaceBetween,
                       children: [
                         const Text(
+
                           'Nearby Hospital',
-                          style:
-                              TextStyle(
-                            color:
-                                Colors.grey,
+
+                          style: TextStyle(
+
+                            color: Colors.grey,
+
                             fontWeight:
-                                FontWeight
-                                    .bold,
-                            fontSize:
-                                18,
+                                FontWeight.bold,
+
+                            fontSize: 18,
                           ),
                         ),
                         TextButton(
-                          onPressed:
-                              showHospitals,
-                          child:
-                              const Text(
+
+                          onPressed: showHospitals,
+
+                          child: const Text(
+
                             'See All >',
-                            style:
-                                TextStyle(
-                              color:
-                                  Colors.red,
+
+                            style: TextStyle(
+
+                              color: Colors.red,
+
+                              fontWeight:
+                                  FontWeight.bold,
                             ),
                           ),
                         ),
@@ -514,6 +652,13 @@ class _DashboardScreenState
                       "Square Hospital",
                       "3 Km away - Open 24/7",
                     ),
+
+                    const SizedBox(height: 12),
+
+                    hospitalCard(
+                      "Evercare Hospital",
+                      "4 Km away - Open 24/7",
+                    ),
                   ],
                 ),
               ),
@@ -522,40 +667,48 @@ class _DashboardScreenState
         ),
       ),
 
+      /// BOTTOM NAVIGATION BAR
       bottomNavigationBar:
           BottomNavigationBar(
-        currentIndex: 0,
+
+        currentIndex: currentIndex,
+
         selectedItemColor:
             Colors.red,
+
         unselectedItemColor:
             Colors.grey,
+
         type:
-            BottomNavigationBarType
-                .fixed,
-        onTap: _navigateTo,
+            BottomNavigationBarType.fixed,
+
+        onTap: _navigate,
+
         items: const [
+
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
+
           BottomNavigationBarItem(
-            icon:
-                Icon(Icons.bloodtype),
+            icon: Icon(Icons.bloodtype),
             label: 'Request',
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
             label: 'My Request',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-                Icons.notifications),
-            label:
-                'Notification',
-          ),
+
           BottomNavigationBarItem(
             icon:
-                Icon(Icons.person),
+                Icon(Icons.notifications),
+            label: 'Notification',
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
@@ -563,54 +716,106 @@ class _DashboardScreenState
     );
   }
 
+  /// HOSPITAL CARD
   Widget hospitalCard(
     String title,
     String subtitle,
   ) {
+
     return Container(
+
       padding:
           const EdgeInsets.all(14),
+
       decoration: BoxDecoration(
+
         color:
             const Color(0xFFF0EAEA),
+
         borderRadius:
-            BorderRadius.circular(
-                12),
+            BorderRadius.circular(12),
       ),
+
       child: Row(
+
         children: [
+
           const CircleAvatar(
+
+            radius: 26,
+
             backgroundColor:
                 Colors.white,
+
             child: Icon(
+
               Icons.local_hospital,
+
               color: Colors.red,
+
+              size: 30,
             ),
           ),
-          const SizedBox(
-              width: 12),
+
+          const SizedBox(width: 12),
+
           Expanded(
+
             child: Column(
+
               crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
+                  CrossAxisAlignment.start,
+
               children: [
+
                 Text(
+
                   title,
-                  style:
-                      const TextStyle(
+
+                  style: const TextStyle(
+
                     fontWeight:
                         FontWeight.bold,
+
+                    fontSize: 15,
                   ),
                 ),
-                Text(subtitle),
+
+                const SizedBox(height: 5),
+
+                Text(
+
+                  subtitle,
+
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
+          ),
+
+          const Icon(
+            Icons.add,
+            color: Colors.red,
+            size: 30,
           ),
         ],
       ),
     );
   }
+
+  /// QUICK ACTION WIDGET
+  Widget _quickAction({
+
+    required IconData icon,
+
+    required String title,
+
+    required VoidCallback onTap,
+
+  }) {
 
   Widget _quickAction(
     IconData icon,
@@ -618,37 +823,61 @@ class _DashboardScreenState
     VoidCallback onTap,
   ) {
     return InkWell(
+
+      borderRadius:
+          BorderRadius.circular(16),
+
       onTap: onTap,
       borderRadius:
           BorderRadius.circular(
               16),
       child: Container(
+
         padding:
-            const EdgeInsets.all(
-                14),
-        decoration:
-            BoxDecoration(
+            const EdgeInsets.all(14),
+
+        decoration: BoxDecoration(
+
           color: Colors.white,
           borderRadius:
-              BorderRadius.circular(
-                  16),
+              BorderRadius.circular(16),
+
+          boxShadow: [
+
+            BoxShadow(
+
+              color: Colors.black
+                  .withOpacity(0.05),
+
+              blurRadius: 8,
+            ),
+          ],
         ),
         child: Row(
+
           children: [
             Icon(
+
               icon,
+
               size: 35,
+
               color: Colors.red,
             ),
             const SizedBox(
                 width: 10),
             Expanded(
+
               child: Text(
+
                 title,
-                style:
-                    const TextStyle(
+
+                style: const TextStyle(
+
                   fontWeight:
                       FontWeight.bold,
+
+                  fontSize: 16,
                 ),
               ),
             ),

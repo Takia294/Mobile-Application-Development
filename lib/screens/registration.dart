@@ -1,11 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes/screen_routes.dart';
 
-class RegistrationScreen
-    extends StatefulWidget {
-
+class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({
     super.key,
   });
@@ -61,6 +60,8 @@ class _RegistrationScreenState
   bool obscureConfirmPassword =
       true;
 
+  bool isLoading = false;
+
   /// DATE PICKER
   Future<void> pickDate() async {
 
@@ -74,7 +75,6 @@ class _RegistrationScreenState
 
       firstDate:
           DateTime(1950),
-
       lastDate:
           DateTime.now(),
     );
@@ -88,92 +88,99 @@ class _RegistrationScreenState
     }
   }
 
-  /// SAVE USER DATA
-  Future<void> saveUserData()
-      async {
+  /// FIREBASE REGISTER
+  Future<void> registerUser() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
 
-    final prefs =
-        await SharedPreferences
-            .getInstance();
+      /// CREATE USER
+      UserCredential userCredential =
+          await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(
+        email:
+            emailController.text.trim(),
+        password:
+            passwordController.text.trim(),
+      );
 
-    /// PROFILE DATA
-    await prefs.setString(
-      'fullName',
-      fullNameController.text
-          .trim(),
-    );
+      /// USER ID
+      String uid =
+          userCredential.user!.uid;
 
-    await prefs.setString(
-      'email',
-      emailController.text
-          .trim(),
-    );
+      /// SAVE USER DATA TO FIRESTORE
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set({
+        "uid": uid,
+        "fullName":
+            fullNameController.text
+                .trim(),
+        "email":
+            emailController.text.trim(),
+        "phone":
+            phoneController.text.trim(),
+        "house":
+            houseController.text.trim(),
+        "road":
+            roadController.text.trim(),
+        "area":
+            areaController.text.trim(),
+        "city":
+            cityController.text.trim(),
+        "gender":
+            gender ?? "Not Set",
+        "dob":
+            selectedDate != null
+                ? "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"
+                : "",
+        "bloodGroup": "None",
+        "donorType": "None",
+        "createdAt":
+            Timestamp.now(),
+      });
 
-    await prefs.setString(
-      'phone',
-      phoneController.text
-          .trim(),
-    );
+      if (!mounted) return;
 
-    await prefs.setString(
-      'house',
-      houseController.text
-          .trim(),
-    );
+      _showSnackBar(
+        "Registration Successful",
+      );
 
-    await prefs.setString(
-      'road',
-      roadController.text
-          .trim(),
-    );
+      /// GO TO LOGIN
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.login,
+      );
+    } on FirebaseAuthException catch (e) {
+      String message =
+          "Registration Failed";
 
-    await prefs.setString(
-      'area',
-      areaController.text
-          .trim(),
-    );
+      if (e.code ==
+          'email-already-in-use') {
+        message =
+            "Email already exists";
+      } else if (e.code ==
+          'weak-password') {
+        message =
+            "Password is too weak";
+      } else if (e.code ==
+          'invalid-email') {
+        message =
+            "Invalid email";
+      }
 
-    await prefs.setString(
-      'city',
-      cityController.text
-          .trim(),
-    );
-
-    await prefs.setString(
-      'gender',
-      gender ?? 'Not Set',
-    );
-
-    await prefs.setString(
-      'dob',
-      selectedDate
-              ?.toString() ??
-          '',
-    );
-
-    /// LOGIN AUTH DATA
-    await prefs.setString(
-      'user_email',
-      emailController.text
-          .trim(),
-    );
-
-    await prefs.setString(
-      'user_password',
-      passwordController.text
-          .trim(),
-    );
-
-    /// DEFAULT PROFILE DATA
-    await prefs.setString(
-      'bloodGroup',
-      'None',
-    );
-
-    await prefs.setString(
-      'donorType',
-      'None',
-    );
+      _showSnackBar(message);
+    } catch (e) {
+      _showSnackBar(
+        e.toString(),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -213,7 +220,6 @@ class _RegistrationScreenState
       ),
 
       appBar: AppBar(
-
         title: const Text(
           "Create Account",
         ),
@@ -269,7 +275,6 @@ class _RegistrationScreenState
 
                 requiredField:
                     true,
-
                 isEmail: true,
               ),
 
@@ -339,20 +344,16 @@ class _RegistrationScreenState
                         .start,
 
                 children: [
-
                   const Align(
-
                     alignment:
                         Alignment
                             .centerLeft,
 
                     child: Text(
-
                       "Gender",
 
                       style:
                           TextStyle(
-
                         fontWeight:
                             FontWeight
                                 .bold,
@@ -372,9 +373,7 @@ class _RegistrationScreenState
 
                         onChanged:
                             (value) {
-
                           setState(() {
-
                             gender =
                                 value;
                           });
@@ -394,9 +393,7 @@ class _RegistrationScreenState
 
                         onChanged:
                             (value) {
-
                           setState(() {
-
                             gender =
                                 value;
                           });
@@ -416,9 +413,7 @@ class _RegistrationScreenState
 
                         onChanged:
                             (value) {
-
                           setState(() {
-
                             gender =
                                 value;
                           });
@@ -469,7 +464,6 @@ class _RegistrationScreenState
                   style: TextStyle(
                     fontWeight:
                         FontWeight.bold,
-
                     fontSize: 16,
                   ),
                 ),
@@ -601,78 +595,66 @@ class _RegistrationScreenState
                   ),
 
                   onPressed:
-                      () async {
+                      isLoading
+                          ? null
+                          : () async {
+                              if (!_formKey
+                                  .currentState!
+                                  .validate()) {
+                                return;
+                              }
 
-                    if (!_formKey
-                        .currentState!
-                        .validate()) {
+                              if (selectedDate ==
+                                  null) {
+                                _showSnackBar(
+                                  "Please select date of birth",
+                                );
+                                return;
+                              }
 
-                      return;
-                    }
+                              if (gender ==
+                                  null) {
+                                _showSnackBar(
+                                  "Please select gender",
+                                );
+                                return;
+                              }
 
-                    if (selectedDate ==
-                        null) {
+                              if (passwordController
+                                      .text !=
+                                  confirmPasswordController
+                                      .text) {
+                                _showSnackBar(
+                                  "Passwords do not match",
+                                );
+                                return;
+                              }
 
-                      _showSnackBar(
-                        "Please select date of birth",
-                      );
-
-                      return;
-                    }
-
-                    if (gender ==
-                        null) {
-
-                      _showSnackBar(
-                        "Please select gender",
-                      );
-
-                      return;
-                    }
-
-                    if (passwordController
-                            .text !=
-                        confirmPasswordController
-                            .text) {
-
-                      _showSnackBar(
-                        "Passwords do not match",
-                      );
-
-                      return;
-                    }
-
-                    /// SAVE DATA
-                    await saveUserData();
-
-                    _showSnackBar(
-                      "Registration Successful",
-                    );
-
-                    /// GO LOGIN
-                    Navigator.pushReplacementNamed(
-                      context,
-                      AppRoutes.login,
-                    );
-                  },
+                              await registerUser();
+                            },
 
                   child:
-                      const Text(
+                      isLoading
+                          ? const CircularProgressIndicator(
+                              color:
+                                  Colors.white,
+                            )
+                          : const Text(
+                              "Create Account",
 
-                    "Create Account",
+                              style:
+                                  TextStyle(
+                                fontSize:
+                                    16,
 
-                    style: TextStyle(
+                                fontWeight:
+                                    FontWeight
+                                        .bold,
 
-                      fontSize: 16,
-
-                      fontWeight:
-                          FontWeight
-                              .bold,
-
-                      color:
-                          Colors.white,
-                    ),
-                  ),
+                                color:
+                                    Colors.white,
+                              ),
+                            ),
                 ),
               ),
 
@@ -708,7 +690,6 @@ class _RegistrationScreenState
 
                       style:
                           TextStyle(
-
                         color:
                             Color(
                           0xFFE53935,
@@ -755,7 +736,6 @@ class _RegistrationScreenState
         false,
 
     bool isEmail = false,
-
   }) {
 
     return TextFormField(
@@ -802,7 +782,6 @@ class _RegistrationScreenState
         if (isEmail &&
             value != null &&
             !value.contains('@')) {
-
           return "Enter valid email";
         }
 
