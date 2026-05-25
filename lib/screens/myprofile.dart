@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'dashboard.dart';
-import 'emergency_request.dart';
+import '../routes/screen_routes.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -50,6 +50,18 @@ class _MyProfileScreenState
     final prefs =
         await SharedPreferences
             .getInstance();
+
+    if (!mounted) return;
+
+    final profilePath =
+        prefs.getString(
+      'profileImage',
+    );
+
+    final certificatePath =
+        prefs.getString(
+      'certificateImage',
+    );
 
     setState(() {
       fullName =
@@ -117,11 +129,23 @@ class _MyProfileScreenState
             'dob',
           ) ??
           'None';
+
+      if (profilePath != null) {
+        profileImage =
+            File(profilePath);
+      }
+
+      if (certificatePath !=
+          null) {
+        certificateImage =
+            File(certificatePath);
+      }
     });
   }
 
   /// SAVE PROFILE INFO
-  Future<void> saveProfileData() async {
+  Future<void>
+      saveProfileData() async {
     final prefs =
         await SharedPreferences
             .getInstance();
@@ -137,8 +161,28 @@ class _MyProfileScreenState
     );
   }
 
+  /// SAVE IMAGE LOCALLY
+  Future<File> _saveImage(
+    XFile image,
+    String fileName,
+  ) async {
+    final directory =
+        await getApplicationDocumentsDirectory();
+
+    final path =
+        '${directory.path}/$fileName';
+
+    final savedImage =
+        await File(
+      image.path,
+    ).copy(path);
+
+    return savedImage;
+  }
+
   /// PICK PROFILE IMAGE
-  Future<void> pickProfileImage(
+  Future<void>
+      pickProfileImage(
     ImageSource source,
   ) async {
     final XFile? image =
@@ -147,17 +191,32 @@ class _MyProfileScreenState
       imageQuality: 70,
     );
 
-    if (image != null) {
-      setState(() {
-        profileImage = File(
-          image.path,
-        );
-      });
-    }
+    if (image == null) return;
+
+    final prefs =
+        await SharedPreferences
+            .getInstance();
+
+    final savedImage =
+        await _saveImage(
+      image,
+      'profile.jpg',
+    );
+
+    await prefs.setString(
+      'profileImage',
+      savedImage.path,
+    );
+
+    setState(() {
+      profileImage =
+          savedImage;
+    });
   }
 
   /// PICK CERTIFICATE
-  Future<void> pickCertificate(
+  Future<void>
+      pickCertificate(
     ImageSource source,
   ) async {
     final XFile? image =
@@ -166,31 +225,46 @@ class _MyProfileScreenState
       imageQuality: 70,
     );
 
-    if (image != null) {
-      setState(() {
-        certificateImage = File(
-          image.path,
-        );
-      });
+    if (image == null) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Certificate Uploaded Successfully',
-          ),
+    final prefs =
+        await SharedPreferences
+            .getInstance();
+
+    final savedImage =
+        await _saveImage(
+      image,
+      'certificate.jpg',
+    );
+
+    await prefs.setString(
+      'certificateImage',
+      savedImage.path,
+    );
+
+    setState(() {
+      certificateImage =
+          savedImage;
+    });
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Certificate Uploaded Successfully',
         ),
-      );
-    }
+      ),
+    );
   }
 
-  /// IMAGE PICK OPTIONS
+  /// IMAGE PICKER
   void showImagePickerOptions(
     bool isProfile,
   ) {
     showModalBottomSheet(
       context: context,
-
       builder:
           (context) => SafeArea(
             child: Wrap(
@@ -199,55 +273,46 @@ class _MyProfileScreenState
                   leading: const Icon(
                     Icons.photo,
                   ),
-
                   title: const Text(
                     'Choose from Gallery',
                   ),
-
                   onTap: () {
                     Navigator.pop(
                       context,
                     );
 
-                    if (isProfile) {
-                      pickProfileImage(
-                        ImageSource
-                            .gallery,
-                      );
-                    } else {
-                      pickCertificate(
-                        ImageSource
-                            .gallery,
-                      );
-                    }
+                    isProfile
+                        ? pickProfileImage(
+                            ImageSource
+                                .gallery,
+                          )
+                        : pickCertificate(
+                            ImageSource
+                                .gallery,
+                          );
                   },
                 ),
-
                 ListTile(
                   leading: const Icon(
                     Icons.camera_alt,
                   ),
-
                   title: const Text(
                     'Camera',
                   ),
-
                   onTap: () {
                     Navigator.pop(
                       context,
                     );
 
-                    if (isProfile) {
-                      pickProfileImage(
-                        ImageSource
-                            .camera,
-                      );
-                    } else {
-                      pickCertificate(
-                        ImageSource
-                            .camera,
-                      );
-                    }
+                    isProfile
+                        ? pickProfileImage(
+                            ImageSource
+                                .camera,
+                          )
+                        : pickCertificate(
+                            ImageSource
+                                .camera,
+                          );
                   },
                 ),
               ],
@@ -270,37 +335,29 @@ class _MyProfileScreenState
 
     showDialog(
       context: context,
-
       builder:
-          (context) => AlertDialog(
+          (_) => AlertDialog(
             title: const Text(
               'Edit Profile',
             ),
-
             content: Column(
               mainAxisSize:
                   MainAxisSize.min,
-
               children: [
                 TextField(
                   controller:
                       bloodController,
-
                   decoration:
                       const InputDecoration(
                     labelText:
                         'Blood Group',
                   ),
                 ),
-
                 const SizedBox(
-                  height: 12,
-                ),
-
+                    height: 12),
                 TextField(
                   controller:
                       donorController,
-
                   decoration:
                       const InputDecoration(
                     labelText:
@@ -309,40 +366,36 @@ class _MyProfileScreenState
                 ),
               ],
             ),
-
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                  );
-                },
-
+                onPressed: () =>
+                    Navigator.pop(
+                        context),
                 child: const Text(
-                  'Cancel',
-                ),
+                    'Cancel'),
               ),
-
               ElevatedButton(
-                onPressed: () async {
+                onPressed:
+                    () async {
                   setState(() {
                     bloodGroup =
                         bloodController
-                            .text;
+                            .text
+                            .trim();
 
                     donorType =
                         donorController
-                            .text;
+                            .text
+                            .trim();
                   });
 
                   await saveProfileData();
 
                   Navigator.pop(
-                    context,
-                  );
+                      context);
                 },
-
-                child: const Text(
+                child:
+                    const Text(
                   'Save',
                 ),
               ),
@@ -353,625 +406,188 @@ class _MyProfileScreenState
 
   @override
   Widget build(
-    BuildContext context,
-  ) {
+      BuildContext context) {
+    final address =
+        '$house $road $area $city'
+            .trim();
+
     return Scaffold(
       backgroundColor:
           const Color(
-            0xFFF5EFEF,
-          ),
+              0xFFF5EFEF),
 
       body: SafeArea(
         child:
             SingleChildScrollView(
-              child: Column(
-                children: [
-                  /// TOP SECTION
-                  Container(
-                    width:
-                        double.infinity,
-
-                    padding:
-                        const EdgeInsets.only(
-                          top: 20,
-                          bottom: 20,
-                        ),
-
-                    decoration:
-                        const BoxDecoration(
-                          color:
-                              Colors.white,
-
-                          borderRadius:
-                              BorderRadius.only(
-                                bottomLeft:
-                                    Radius.circular(
-                                      25,
-                                    ),
-                                bottomRight:
-                                    Radius.circular(
-                                      25,
-                                    ),
-                              ),
-                        ),
-
-                    child: Column(
-                      children: [
-                        const Text(
-                          'My profile',
-
-                          style:
-                              TextStyle(
-                                color:
-                                    Colors.red,
-
-                                fontWeight:
-                                    FontWeight
-                                        .bold,
-
-                                fontSize:
-                                    28,
-                              ),
-                        ),
-
-                        const SizedBox(
-                          height: 15,
-                        ),
-
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 55,
-
-                              backgroundColor:
-                                  Colors
-                                      .teal
-                                      .shade200,
-
-                              backgroundImage:
-                                  profileImage !=
-                                          null
-                                      ? FileImage(
-                                        profileImage!,
-                                      )
-                                      : null,
-
-                              child:
-                                  profileImage ==
-                                          null
-                                      ? const Icon(
-                                        Icons
-                                            .person,
-                                        size:
-                                            70,
-                                        color:
-                                            Colors.white,
-                                      )
-                                      : null,
-                            ),
-
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-
-                              child:
-                                  GestureDetector(
-                                    onTap: () {
-                                      showImagePickerOptions(
-                                        true,
-                                      );
-                                    },
-
-                                    child:
-                                        Container(
-                                          padding:
-                                              const EdgeInsets.all(
-                                                8,
-                                              ),
-
-                                          decoration:
-                                              const BoxDecoration(
-                                                color:
-                                                    Colors.red,
-
-                                                shape:
-                                                    BoxShape.circle,
-                                              ),
-
-                                          child:
-                                              const Icon(
-                                                Icons
-                                                    .edit,
-                                                color:
-                                                    Colors.white,
-                                                size:
-                                                    18,
-                                              ),
-                                        ),
-                                  ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(
-                          height: 15,
-                        ),
-
-                        Text(
-                          fullName,
-
-                          style:
-                              const TextStyle(
-                                fontSize:
-                                    26,
-
-                                fontWeight:
-                                    FontWeight
-                                        .bold,
-                              ),
-                        ),
-
-                        const SizedBox(
-                          height: 10,
-                        ),
-
-                        GestureDetector(
-                          onTap:
-                              editProfileDialog,
-
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(
-                                  horizontal:
-                                      20,
-                                  vertical:
-                                      8,
-                                ),
-
-                            decoration:
-                                BoxDecoration(
-                                  color:
-                                      Colors.red,
-
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                        20,
-                                      ),
-                                ),
-
-                            child: Text(
-                              bloodGroup ==
-                                          'None'
-                                      ? 'Edit Profile'
-                                      : '$bloodGroup Donor',
-
-                              style:
-                                  const TextStyle(
-                                    color:
-                                        Colors.white,
-
-                                    fontWeight:
-                                        FontWeight
-                                            .bold,
-                                  ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(
-                          height: 20,
-                        ),
-
-                        /// INFO CARD
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(
-                                horizontal:
-                                    12,
-                              ),
-
-                          child: Column(
-                            children: [
-                              _infoTile(
-                                Icons.phone,
-                                phone,
-                              ),
-
-                              _infoTile(
-                                Icons.email,
-                                email,
-                              ),
-
-                              _infoTile(
-                                Icons.location_on,
-                                '$house $road $area $city',
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(
-                          height: 15,
-                        ),
-
-                        /// BUTTONS
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(
-                                horizontal:
-                                    10,
-                              ),
-
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child:
-                                    ElevatedButton(
-                                      style:
-                                          ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                Colors.red,
-                                          ),
-
-                                      onPressed:
-                                          () {
-                                            Navigator.push(
-                                              context,
-
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (
-                                                      context,
-                                                    ) =>
-                                                        const EmergencyRequestScreen(),
-                                              ),
-                                            );
-                                          },
-
-                                      child:
-                                          const Text(
-                                            'Respond to Blood Request',
-
-                                            style:
-                                                TextStyle(
-                                                  color:
-                                                      Colors.white,
-
-                                                  fontSize:
-                                                      11,
-                                                ),
-                                          ),
-                                    ),
-                              ),
-
-                              const SizedBox(
-                                width:
-                                    8,
-                              ),
-
-                              Expanded(
-                                child:
-                                    ElevatedButton(
-                                      style:
-                                          ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                Colors.purple,
-                                          ),
-
-                                      onPressed:
-                                          () {
-                                            Navigator.push(
-                                              context,
-
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (
-                                                      context,
-                                                    ) =>
-                                                        const EmergencyRequestScreen(),
-                                              ),
-                                            );
-                                          },
-
-                                      child:
-                                          const Text(
-                                            'Respond to Organ Request',
-
-                                            style:
-                                                TextStyle(
-                                                  color:
-                                                      Colors.white,
-
-                                                  fontSize:
-                                                      11,
-                                                ),
-                                          ),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(
-                          height: 8,
-                        ),
-
-                        const Text(
-                          'In Progress',
-                        ),
-                      ],
+          child: Column(
+            children: [
+              Container(
+                width:
+                    double.infinity,
+                padding:
+                    const EdgeInsets.all(
+                        20),
+                decoration:
+                    const BoxDecoration(
+                  color:
+                      Colors.white,
+                  borderRadius:
+                      BorderRadius.only(
+                    bottomLeft:
+                        Radius.circular(
+                            25),
+                    bottomRight:
+                        Radius.circular(
+                            25),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'My Profile',
+                      style:
+                          TextStyle(
+                        color:
+                            Colors.red,
+                        fontWeight:
+                            FontWeight
+                                .bold,
+                        fontSize:
+                            28,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(
-                    height: 20,
-                  ),
+                    const SizedBox(
+                        height: 15),
 
-                  /// DONATION HISTORY
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(
-                          horizontal:
-                              12,
-                        ),
-
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment
-                              .start,
-
-                      children: [
-                        const Text(
-                          'Donation History',
-
-                          style:
-                              TextStyle(
-                                fontSize:
-                                    22,
-
-                                fontWeight:
-                                    FontWeight
-                                        .bold,
-                              ),
-                        ),
-
-                        const SizedBox(
-                          height: 12,
-                        ),
-
-                        _historyCard(
-                          '1 Jan, 2026',
-                          'Blood Donation',
-                          'City Hospital - 2.5 Km away',
-                        ),
-
-                        _historyCard(
-                          '10 Mar, 2025',
-                          'Kidney Donation',
-                          'City Hospital - 2.5 Km away',
-                        ),
-
-                        _historyCard(
-                          '1 Jan, 2026',
-                          'Blood Donation',
-                          'Green Clinic - 2.5 Km away',
-                        ),
-                      ],
+                    GestureDetector(
+                      onTap: () {
+                        showImagePickerOptions(
+                            true);
+                      },
+                      child:
+                          CircleAvatar(
+                        radius: 55,
+                        backgroundImage:
+                            profileImage !=
+                                    null
+                                ? FileImage(
+                                    profileImage!)
+                                : null,
+                        child:
+                            profileImage ==
+                                    null
+                                ? const Icon(
+                                    Icons
+                                        .person,
+                                    size:
+                                        60,
+                                  )
+                                : null,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(
-                    height: 25,
-                  ),
+                    const SizedBox(
+                        height: 10),
 
-                  /// CERTIFICATE
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(
-                          horizontal:
-                              12,
-                        ),
-
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment
-                              .start,
-
-                      children: [
-                        const Text(
-                          'DOP Certificate',
-
-                          style:
-                              TextStyle(
-                                fontSize:
-                                    22,
-
-                                fontWeight:
-                                    FontWeight
-                                        .bold,
-                              ),
-                        ),
-
-                        const SizedBox(
-                          height: 15,
-                        ),
-
-                        SizedBox(
-                          width:
-                              double.infinity,
-
-                          height: 50,
-
-                          child:
-                              ElevatedButton.icon(
-                                style:
-                                    ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.red,
-
-                                      shape:
-                                          RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                  25,
-                                                ),
-                                          ),
-                                    ),
-
-                                onPressed: () {
-                                  showImagePickerOptions(
-                                    false,
-                                  );
-                                },
-
-                                icon:
-                                    const Icon(
-                                      Icons
-                                          .upload,
-                                      color:
-                                          Colors.white,
-                                    ),
-
-                                label:
-                                    const Text(
-                                      'Upload Donor Certificate',
-
-                                      style:
-                                          TextStyle(
-                                            color:
-                                                Colors.white,
-
-                                            fontWeight:
-                                                FontWeight.bold,
-                                          ),
-                                    ),
-                              ),
-                        ),
-
-                        if (certificateImage !=
-                            null)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(
-                                  top:
-                                      15,
-                                ),
-
-                            child:
-                                ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                        12,
-                                      ),
-
-                                  child:
-                                      Image.file(
-                                        certificateImage!,
-
-                                        height:
-                                            180,
-
-                                        width:
-                                            double.infinity,
-
-                                        fit:
-                                            BoxFit.cover,
-                                      ),
-                                ),
-                          ),
-                      ],
+                    Text(
+                      fullName,
+                      style:
+                          const TextStyle(
+                        fontSize:
+                            24,
+                        fontWeight:
+                            FontWeight
+                                .bold,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(
-                    height: 30,
-                  ),
-                ],
-              ),
-            ),
-      ),
+                    Text(
+                      bloodGroup,
+                    ),
 
-      /// BOTTOM NAVBAR
-      bottomNavigationBar:
-          BottomNavigationBar(
-            currentIndex: 3,
+                    const SizedBox(
+                        height: 20),
 
-            type:
-                BottomNavigationBarType
-                    .fixed,
-
-            selectedItemColor:
-                Colors.black,
-
-            unselectedItemColor:
-                Colors.black54,
-
-            showSelectedLabels:
-                false,
-
-            showUnselectedLabels:
-                false,
-
-            onTap: (index) {
-              if (index == 0) {
-                Navigator.pushReplacement(
-                  context,
-
-                  MaterialPageRoute(
-                    builder:
-                        (
-                          context,
-                        ) =>
-                            const DashboardScreen(),
-                  ),
-                );
-              }
-
-              if (index == 1) {
-                Navigator.pushReplacement(
-                  context,
-
-                  MaterialPageRoute(
-                    builder:
-                        (
-                          context,
-                        ) =>
-                            const EmergencyRequestScreen(),
-                  ),
-                );
-              }
-            },
-
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.home_outlined,
+                    _infoTile(
+                        Icons.phone,
+                        phone),
+                    _infoTile(
+                        Icons.email,
+                        email),
+                    _infoTile(
+                      Icons.location_on,
+                      address
+                              .isEmpty
+                          ? 'No address'
+                          : address,
+                    ),
+                  ],
                 ),
-                label: '',
-              ),
-
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.edit_note,
-                ),
-                label: '',
-              ),
-
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.assignment_outlined,
-                ),
-                label: '',
-              ),
-
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.person,
-                ),
-                label: '',
               ),
             ],
           ),
+        ),
+      ),
+
+      bottomNavigationBar:
+          BottomNavigationBar(
+        currentIndex: 4,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes
+                    .dashboard,
+              );
+              break;
+
+            case 1:
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes
+                    .emergencyRequest,
+              );
+              break;
+
+            case 3:
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes
+                    .myRequest,
+              );
+              break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(
+                Icons.home),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+                Icons.bloodtype),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+                Icons.notifications),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon:
+                Icon(Icons.list),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+                Icons.person),
+            label: '',
+          ),
+        ],
+      ),
     );
   }
 
@@ -979,135 +595,10 @@ class _MyProfileScreenState
     IconData icon,
     String text,
   ) {
-    return Container(
-      margin:
-          const EdgeInsets.only(
-            bottom: 8,
-          ),
-
-      padding:
-          const EdgeInsets.all(14),
-
-      decoration:
-          BoxDecoration(
-            color:
-                const Color(
-                  0xFFF1EAEA,
-                ),
-
-            borderRadius:
-                BorderRadius.circular(
-                  10,
-                ),
-          ),
-
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 28,
-          ),
-
-          const SizedBox(
-            width: 10,
-          ),
-
-          Expanded(
-            child: Text(
-              text.isEmpty
-                  ? 'None'
-                  : text,
-
-              style:
-                  const TextStyle(
-                    fontSize: 16,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _historyCard(
-    String date,
-    String title,
-    String location,
-  ) {
-    return Container(
-      margin:
-          const EdgeInsets.only(
-            bottom: 10,
-          ),
-
-      padding:
-          const EdgeInsets.all(12),
-
-      decoration:
-          BoxDecoration(
-            color:
-                const Color(
-                  0xFFF1EAEA,
-                ),
-
-            borderRadius:
-                BorderRadius.circular(
-                  12,
-                ),
-          ),
-
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor:
-                Colors.red.shade200,
-
-            child: const Icon(
-              Icons.favorite,
-              color: Colors.white,
-            ),
-          ),
-
-          const SizedBox(
-            width: 12,
-          ),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
-
-              children: [
-                Text(
-                  '$date - $title',
-
-                  style:
-                      const TextStyle(
-                        fontWeight:
-                            FontWeight
-                                .bold,
-                      ),
-                ),
-
-                const SizedBox(
-                  height: 4,
-                ),
-
-                Text(
-                  location,
-
-                  style:
-                      const TextStyle(
-                        color:
-                            Colors.black54,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(text),
       ),
     );
   }
