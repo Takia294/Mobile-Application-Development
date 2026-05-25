@@ -10,12 +10,15 @@ class RegistrationScreen extends StatefulWidget {
   });
 
   @override
-  State<RegistrationScreen> createState() =>
-      _RegistrationScreenState();
+  State<RegistrationScreen>
+      createState() =>
+          _RegistrationScreenState();
 }
 
 class _RegistrationScreenState
-    extends State<RegistrationScreen> {
+    extends State<
+        RegistrationScreen> {
+
   final _formKey =
       GlobalKey<FormState>();
 
@@ -61,11 +64,15 @@ class _RegistrationScreenState
 
   /// DATE PICKER
   Future<void> pickDate() async {
+
     DateTime? picked =
         await showDatePicker(
+
       context: context,
+
       initialDate:
           DateTime(2000),
+
       firstDate:
           DateTime(1950),
       lastDate:
@@ -73,7 +80,9 @@ class _RegistrationScreenState
     );
 
     if (picked != null) {
+
       setState(() {
+
         selectedDate = picked;
       });
     }
@@ -176,6 +185,7 @@ class _RegistrationScreenState
 
   @override
   void dispose() {
+
     fullNameController.dispose();
 
     emailController.dispose();
@@ -201,7 +211,9 @@ class _RegistrationScreenState
   @override
   Widget build(
       BuildContext context) {
+
     return Scaffold(
+
       backgroundColor:
           const Color(
         0xFFF6F6F6,
@@ -220,24 +232,30 @@ class _RegistrationScreenState
 
       body:
           SingleChildScrollView(
+
         padding:
             const EdgeInsets.all(
           24,
         ),
 
         child: Form(
+
           key: _formKey,
 
           child: Column(
             children: [
+
               /// FULL NAME
               _inputField(
                 controller:
                     fullNameController,
+
                 label:
                     "Full Name",
+
                 icon:
                     Icons.person,
+
                 requiredField:
                     true,
               ),
@@ -249,9 +267,12 @@ class _RegistrationScreenState
               _inputField(
                 controller:
                     emailController,
+
                 label: "Email",
+
                 icon:
                     Icons.email,
+
                 requiredField:
                     true,
                 isEmail: true,
@@ -262,9 +283,11 @@ class _RegistrationScreenState
 
               /// DATE OF BIRTH
               GestureDetector(
+
                 onTap: pickDate,
 
                 child: Container(
+
                   width:
                       double.infinity,
 
@@ -277,6 +300,7 @@ class _RegistrationScreenState
 
                   decoration:
                       BoxDecoration(
+
                     color:
                         Colors.white,
 
@@ -289,6 +313,7 @@ class _RegistrationScreenState
 
                   child: Row(
                     children: [
+
                       const Icon(
                         Icons.cake,
                       ),
@@ -297,6 +322,7 @@ class _RegistrationScreenState
                           width: 10),
 
                       Text(
+
                         selectedDate ==
                                 null
                             ? "Select Date of Birth"
@@ -312,6 +338,7 @@ class _RegistrationScreenState
 
               /// GENDER
               Column(
+
                 crossAxisAlignment:
                     CrossAxisAlignment
                         .start,
@@ -336,6 +363,7 @@ class _RegistrationScreenState
 
                   Row(
                     children: [
+
                       Radio(
                         value:
                             "Male",
@@ -405,6 +433,7 @@ class _RegistrationScreenState
 
               /// PHONE
               _inputField(
+
                 controller:
                     phoneController,
 
@@ -421,13 +450,15 @@ class _RegistrationScreenState
               const SizedBox(
                   height: 20),
 
-              /// ADDRESS
+              /// ADDRESS TITLE
               const Align(
+
                 alignment:
                     Alignment
                         .centerLeft,
 
                 child: Text(
+
                   "Address (Optional)",
 
                   style: TextStyle(
@@ -485,6 +516,7 @@ class _RegistrationScreenState
 
               /// PASSWORD
               _passwordField(
+
                 controller:
                     passwordController,
 
@@ -495,7 +527,9 @@ class _RegistrationScreenState
                     obscurePassword,
 
                 toggle: () {
+
                   setState(() {
+
                     obscurePassword =
                         !obscurePassword;
                   });
@@ -507,6 +541,7 @@ class _RegistrationScreenState
 
               /// CONFIRM PASSWORD
               _passwordField(
+
                 controller:
                     confirmPasswordController,
 
@@ -517,7 +552,9 @@ class _RegistrationScreenState
                     obscureConfirmPassword,
 
                 toggle: () {
+
                   setState(() {
+
                     obscureConfirmPassword =
                         !obscureConfirmPassword;
                   });
@@ -529,6 +566,7 @@ class _RegistrationScreenState
 
               /// REGISTER BUTTON
               SizedBox(
+
                 width:
                     double.infinity,
 
@@ -536,9 +574,11 @@ class _RegistrationScreenState
 
                 child:
                     ElevatedButton(
+
                   style:
                       ElevatedButton
                           .styleFrom(
+
                     backgroundColor:
                         const Color(
                       0xFFE53935,
@@ -546,6 +586,7 @@ class _RegistrationScreenState
 
                     shape:
                         RoundedRectangleBorder(
+
                       borderRadius:
                           BorderRadius.circular(
                         12,
@@ -622,17 +663,21 @@ class _RegistrationScreenState
 
               /// LOGIN
               Row(
+
                 mainAxisAlignment:
                     MainAxisAlignment
                         .center,
 
                 children: [
+
                   const Text(
                     "Already have an account? ",
                   ),
 
                   GestureDetector(
+
                     onTap: () {
+
                       Navigator.pop(
                         context,
                       );
@@ -640,6 +685,7 @@ class _RegistrationScreenState
 
                     child:
                         const Text(
+
                       "Login",
 
                       style:
@@ -666,8 +712,10 @@ class _RegistrationScreenState
   /// SNACKBAR
   void _showSnackBar(
       String message) {
+
     ScaffoldMessenger.of(context)
         .showSnackBar(
+
       SnackBar(
         content: Text(message),
       ),
@@ -676,6 +724,7 @@ class _RegistrationScreenState
 
   /// INPUT FIELD
   Widget _inputField({
+
     required TextEditingController
         controller,
 
@@ -688,11 +737,14 @@ class _RegistrationScreenState
 
     bool isEmail = false,
   }) {
+
     return TextFormField(
+
       controller: controller,
 
       decoration:
           InputDecoration(
+
         labelText: label,
 
         prefixIcon:
@@ -705,6 +757,7 @@ class _RegistrationScreenState
 
         border:
             OutlineInputBorder(
+
           borderRadius:
               BorderRadius.circular(
             12,
@@ -716,11 +769,13 @@ class _RegistrationScreenState
       ),
 
       validator: (value) {
+
         if (requiredField &&
             (value == null ||
                 value
                     .trim()
                     .isEmpty)) {
+
           return "$label is required";
         }
 
@@ -737,6 +792,7 @@ class _RegistrationScreenState
 
   /// PASSWORD FIELD
   Widget _passwordField({
+
     required TextEditingController
         controller,
 
@@ -746,14 +802,18 @@ class _RegistrationScreenState
 
     required VoidCallback
         toggle,
+
   }) {
+
     return TextFormField(
+
       controller: controller,
 
       obscureText: obscure,
 
       decoration:
           InputDecoration(
+
         labelText: label,
 
         prefixIcon:
@@ -763,7 +823,9 @@ class _RegistrationScreenState
 
         suffixIcon:
             IconButton(
+
           icon: Icon(
+
             obscure
                 ? Icons
                     .visibility_off
@@ -781,6 +843,7 @@ class _RegistrationScreenState
 
         border:
             OutlineInputBorder(
+
           borderRadius:
               BorderRadius.circular(
             12,
@@ -792,12 +855,15 @@ class _RegistrationScreenState
       ),
 
       validator: (value) {
+
         if (value == null ||
             value.isEmpty) {
+
           return "$label required";
         }
 
         if (value.length < 6) {
+
           return "Password must be at least 6 characters";
         }
 
