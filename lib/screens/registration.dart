@@ -59,6 +59,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if (picked != null && mounted) {
       setState(() {
+
         selectedDate = picked;
       });
     }
@@ -455,7 +456,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     bool isEmail = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
+
     return TextFormField(
+
       controller: controller,
       keyboardType: keyboardType,
       textInputAction: TextInputAction.next,
@@ -510,7 +513,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     required VoidCallback toggle,
     bool isConfirmPassword = false,
   }) {
+
     return TextFormField(
+
       controller: controller,
       obscureText: obscure,
       textInputAction: TextInputAction.done,

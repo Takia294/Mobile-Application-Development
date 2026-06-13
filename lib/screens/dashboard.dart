@@ -287,7 +287,6 @@ class _DashboardScreenState
         child: Column(
 
           children: [
-
             /// HEADER
             Container(
 
@@ -321,10 +320,9 @@ class _DashboardScreenState
               child: Column(
 
                 crossAxisAlignment:
-                    CrossAxisAlignment.start,
-
+                    CrossAxisAlignment
+                        .start,
                 children: [
-
                   Text(
 
                     'Welcome $userName',
@@ -336,7 +334,8 @@ class _DashboardScreenState
                       fontSize: 24,
 
                       fontWeight:
-                          FontWeight.w600,
+                          FontWeight
+                              .w600,
                     ),
                   ),
 
@@ -345,9 +344,10 @@ class _DashboardScreenState
                   const Text(
 
                     "Let’s make a difference together",
-
-                    style: TextStyle(
-                      color: Colors.white70,
+                    style:
+                        TextStyle(
+                      color: Colors
+                          .white70,
                       fontSize: 14,
                     ),
                   ),
@@ -360,13 +360,13 @@ class _DashboardScreenState
               child: SingleChildScrollView(
 
                 padding:
-                    const EdgeInsets.all(16),
-
+                    const EdgeInsets
+                        .all(16),
                 child: Column(
 
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
-
+                      CrossAxisAlignment
+                          .start,
                   children: [
 
                     /// GREETING
@@ -379,23 +379,21 @@ class _DashboardScreenState
                         fontSize: 24,
 
                         fontWeight:
-                            FontWeight.bold,
+                            FontWeight
+                                .bold,
                       ),
                     ),
 
-                    const SizedBox(height: 5),
+                    const SizedBox(
+                        height: 5),
 
                     const Text(
 
                       "Don’t worry, We are always there for you",
-
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 14,
-                      ),
                     ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(
+                        height: 22),
 
                     /// EMERGENCY CARD
                     Container(
@@ -409,25 +407,24 @@ class _DashboardScreenState
                           BoxDecoration(
 
                         color:
-                            const Color(0xFFF4EEEE),
-
+                            const Color(
+                                0xFFF4EEEE),
                         borderRadius:
-                            BorderRadius.circular(18),
+                            BorderRadius
+                                .circular(
+                                    18),
                       ),
-
                       child: Row(
 
                         children: [
-
                           Expanded(
 
                             child: Column(
 
                               crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-
+                                  CrossAxisAlignment
+                                      .start,
                               children: [
-
                                 const Text(
 
                                   'Emergency Donation Request',
@@ -441,13 +438,17 @@ class _DashboardScreenState
                                   ),
                                 ),
 
-                                const SizedBox(height: 8),
+                                const SizedBox(
+                                    height:
+                                        8),
 
                                 const Text(
                                   'Urgent: Blood type A+ or kidney needed',
                                 ),
 
-                                const SizedBox(height: 14),
+                                const SizedBox(
+                                    height:
+                                        14),
 
                                 ElevatedButton(
 
@@ -486,8 +487,6 @@ class _DashboardScreenState
                             ),
                           ),
 
-                          const SizedBox(width: 12),
-
                           Image.network(
 
                             'https://cdn-icons-png.flaticon.com/512/3209/3209265.png',
@@ -498,7 +497,8 @@ class _DashboardScreenState
                       ),
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(
+                        height: 30),
 
                     /// QUICK ACTIONS
                     const Text(
@@ -516,7 +516,8 @@ class _DashboardScreenState
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(
+                        height: 20),
 
                     GridView.count(
 
@@ -603,16 +604,16 @@ class _DashboardScreenState
                       ],
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(
+                        height: 30),
 
                     /// HOSPITAL SECTION
                     Row(
 
                       mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-
+                          MainAxisAlignment
+                              .spaceBetween,
                       children: [
-
                         const Text(
 
                           'Nearby Hospital',
@@ -627,7 +628,6 @@ class _DashboardScreenState
                             fontSize: 18,
                           ),
                         ),
-
                         TextButton(
 
                           onPressed: showHospitals,
@@ -817,13 +817,20 @@ class _DashboardScreenState
 
   }) {
 
+  Widget _quickAction(
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return InkWell(
 
       borderRadius:
           BorderRadius.circular(16),
 
       onTap: onTap,
-
+      borderRadius:
+          BorderRadius.circular(
+              16),
       child: Container(
 
         padding:
@@ -832,7 +839,6 @@ class _DashboardScreenState
         decoration: BoxDecoration(
 
           color: Colors.white,
-
           borderRadius:
               BorderRadius.circular(16),
 
@@ -847,11 +853,9 @@ class _DashboardScreenState
             ),
           ],
         ),
-
         child: Row(
 
           children: [
-
             Icon(
 
               icon,
@@ -860,9 +864,8 @@ class _DashboardScreenState
 
               color: Colors.red,
             ),
-
-            const SizedBox(width: 10),
-
+            const SizedBox(
+                width: 10),
             Expanded(
 
               child: Text(
