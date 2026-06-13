@@ -8,61 +8,150 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    /// FIREBASE INITIALIZE
     await Firebase.initializeApp(
-      options:
-          DefaultFirebaseOptions
-              .currentPlatform,
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    debugPrint(
+      'Firebase Initialized Successfully',
     );
   } catch (e) {
     debugPrint(
-      'Firebase Init Error: $e',
+      'Firebase Initialization Error: $e',
     );
   }
 
-  runApp(const MyApp());
+  runApp(
+    const MyApp(),
+  );
 }
 
-class MyApp
-    extends StatelessWidget {
+class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner:
-          false,
+      debugShowCheckedModeBanner: false,
 
       title: 'LifeLink',
 
       theme: ThemeData(
-        primarySwatch:
-            Colors.red,
+        useMaterial3: true,
 
-        scaffoldBackgroundColor:
-            const Color(
-          0xFFF6F6F6,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.red,
         ),
 
-        fontFamily:
-            'Roboto',
+        scaffoldBackgroundColor:
+            const Color(0xFFF6F6F6),
 
-        useMaterial3:
-            true,
+        fontFamily: 'Roboto',
+
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+        ),
+
+        elevatedButtonTheme:
+            ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(
+              double.infinity,
+              52,
+            ),
+            shape:
+                RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(
+                12,
+              ),
+            ),
+          ),
+        ),
+
+        inputDecorationTheme:
+            InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+
+          contentPadding:
+              const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+
+          border:
+              OutlineInputBorder(
+            borderRadius:
+                BorderRadius.circular(
+              12,
+            ),
+            borderSide:
+                BorderSide.none,
+          ),
+
+          enabledBorder:
+              OutlineInputBorder(
+            borderRadius:
+                BorderRadius.circular(
+              12,
+            ),
+            borderSide:
+                BorderSide.none,
+          ),
+
+          focusedBorder:
+              OutlineInputBorder(
+            borderRadius:
+                BorderRadius.circular(
+              12,
+            ),
+            borderSide:
+                const BorderSide(
+              color: Colors.red,
+              width: 1.5,
+            ),
+          ),
+
+          errorBorder:
+              OutlineInputBorder(
+            borderRadius:
+                BorderRadius.circular(
+              12,
+            ),
+            borderSide:
+                const BorderSide(
+              color: Colors.red,
+            ),
+          ),
+        ),
+
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(
+              16,
+            ),
+          ),
+        ),
       ),
 
       /// START SCREEN
       initialRoute:
           AppRoutes.splash,
 
-      /// ROUTES
+      /// APP ROUTES
       onGenerateRoute:
-          AppRoutes
-              .generateRoute,
+          AppRoutes.generateRoute,
     );
   }
 }
