@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../models/request_model.dart';
+import '../services/request_database.dart';
 import '../routes/screen_routes.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -16,9 +18,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   // ── Live snapshot caches ──
   List<QueryDocumentSnapshot> _users = [];
-  List<QueryDocumentSnapshot> _requests = [];
+  List<RequestModel> _requests = [];
   List<QueryDocumentSnapshot> _donations = [];
   List<QueryDocumentSnapshot> _complaints = [];
+  int _todayDonationsLive = 0;
 
   // ── Subscriptions ──
   final List<StreamSubscription> _subs = [];
@@ -45,14 +48,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _subs.add(_db.collection('users').snapshots().listen((s) {
       if (mounted) setState(() { _users = s.docs; _lastRefresh = DateTime.now(); });
     }));
-    _subs.add(_db.collection('requests').snapshots().listen((s) {
-      if (mounted) setState(() { _requests = s.docs; _lastRefresh = DateTime.now(); });
+
+    // ── Requests: go through RequestDatabase so this screen and the
+    // ── user app (MyRequestScreen / EmergencyRequestScreen) always
+    // ── agree on shape + status values (Active/Pending/Critical/Fulfilled).
+    _subs.add(RequestDatabase.streamAllRequests().listen((reqs) {
+      if (mounted) setState(() { _requests = reqs; _lastRefresh = DateTime.now(); });
     }));
+
     _subs.add(_db.collection('donations').snapshots().listen((s) {
       if (mounted) setState(() { _donations = s.docs; _lastRefresh = DateTime.now(); });
     }));
     _subs.add(_db.collection('complaints').snapshots().listen((s) {
       if (mounted) setState(() { _complaints = s.docs; _lastRefresh = DateTime.now(); });
+    }));
+
+    // ── Today's Donations: this is the SAME counter that
+    // ── RequestDatabase.incrementTodaysDonations() bumps when a user
+    // ── marks a request as Fulfilled in MyRequestScreen. Reading it via
+    // ── RequestDatabase.streamTodaysDonationCount() keeps both screens
+    // ── pointed at the exact same Firestore document, so the stat card
+    // ── updates live the moment a request is completed.
+    _subs.add(RequestDatabase.streamTodaysDonationCount().listen((count) {
+      if (mounted) setState(() { _todayDonationsLive = count; _lastRefresh = DateTime.now(); });
     }));
   }
 
@@ -69,21 +87,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ────────────────────────────────────────────
   int get _totalUsers => _users.length;
   int get _activeRequests =>
-      _requests.where((r) => (r['status'] ?? '') == 'Active').length;
+      _requests.where((r) => r.status == 'Active').length;
   int get _pendingComplaints =>
       _complaints.where((c) => (c['status'] ?? '') == 'Pending').length;
 
-  int get _todayDonations {
-    final now = DateTime.now();
-    return _donations.where((d) {
-      final ts = (d.data() as Map)['createdAt'];
-      if (ts is Timestamp) {
-        final dt = ts.toDate();
-        return dt.year == now.year && dt.month == now.month && dt.day == now.day;
-      }
-      return false;
-    }).length;
-  }
+  // Today's donations now comes live from RequestDatabase (see _subscribeAll),
+  // fed by RequestDatabase.incrementTodaysDonations() whenever a user marks
+  // their request as Fulfilled. This replaces the old (disconnected) version
+  // that counted documents in a separate `donations` collection.
+  int get _todayDonations => _todayDonationsLive;
 
   String get _sinceSecs {
     final diff = DateTime.now().difference(_lastRefresh).inSeconds;
@@ -132,8 +144,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Future<void> _updateRequestStatus(String docId, String status) async {
-    await _db.collection('requests').doc(docId).update({'status': status});
+    // Routed through RequestDatabase so user-side screens (which also use
+    // RequestDatabase) see the same update instantly via their own streams.
+    await RequestDatabase.updateStatus(requestId: docId, newStatus: status);
+
+    // If an admin manually marks a request Fulfilled from this dashboard,
+    // also bump the same Today's Donations counter the user flow uses,
+    // so the stat card stays accurate regardless of who completed it.
+    if (status == 'Fulfilled') {
+      await RequestDatabase.incrementTodaysDonations();
+    }
+
     _snack('Status updated to $status', isSuccess: true);
+  }
+
+  Future<void> _deleteRequest(String docId) async {
+    final ok = await _confirmDialog('Delete Request', 'Delete this request? This cannot be undone.');
+    if (ok) {
+      await RequestDatabase.deleteRequest(docId);
+      _snack('Request deleted', isError: true);
+    }
   }
 
   Future<bool> _confirmDialog(String title, String body) async {
@@ -534,11 +564,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   itemBuilder: (_, i) {
                     final req = _requests[i];
                     final docId = req.id;
-                    final status = (req['status'] ?? 'Pending').toString();
-                    final type = (req['requestType'] ?? 'N/A').toString();
-                    final details =
-                        (req['bloodGroup'] ?? req['organType'] ?? 'N/A').toString();
-                    final hospital = (req['hospital'] ?? 'N/A').toString();
+                    final status = req.status;
+                    final type = req.requestType;
+                    final details = req.requestType == 'Organ Donation'
+                        ? req.organ
+                        : req.bloodGroup;
+                    final hospital = req.hospital;
 
                     final statusColor = _statusColor(status);
 
@@ -582,6 +613,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             flex: 2,
                             child: GestureDetector(
                               onTap: () => _showStatusPicker(docId, status),
+                              onLongPress: () => _deleteRequest(docId),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 4),
@@ -622,10 +654,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       Colors.cyan, Colors.amber, Colors.lime, Colors.brown,
     ];
 
-    // Request breakdown
+    // Request breakdown — now driven by RequestModel.requestType so it
+    // matches the values actually written by EmergencyRequestScreen
+    // ('Blood Donation' / 'Organ Donation').
     int blood = 0, organ = 0, plasma = 0, other = 0;
     for (final r in _requests) {
-      final t = ((r.data() as Map)['requestType'] ?? '').toString().toLowerCase();
+      final t = r.requestType.toLowerCase();
       if (t.contains('blood')) blood++;
       else if (t.contains('organ')) organ++;
       else if (t.contains('plasma')) plasma++;
@@ -822,6 +856,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   await _updateRequestStatus(docId, s);
                 },
               ),
+            const Divider(height: 20),
+            ListTile(
+              leading: const CircleAvatar(
+                  radius: 8, backgroundColor: Colors.black54),
+              title: const Text('Delete Request',
+                  style: TextStyle(fontSize: 14, color: Colors.red)),
+              onTap: () async {
+                Navigator.pop(context);
+                await _deleteRequest(docId);
+              },
+            ),
           ],
         ),
       ),

@@ -458,7 +458,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }) {
 
     return TextFormField(
-
       controller: controller,
       keyboardType: keyboardType,
       textInputAction: TextInputAction.next,
