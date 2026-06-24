@@ -412,7 +412,6 @@ class _DashboardScreenState
                                       .start,
                               children: [
                                 const Text(
-
                                   'Emergency Donation Request',
                                   style:
                                       TextStyle(
@@ -480,7 +479,6 @@ class _DashboardScreenState
                               width: 12),
 
                           Image.network(
-
                             'https://cdn-icons-png.flaticon.com/512/3209/3209265.png',
                             height: 90,
                             errorBuilder:
@@ -507,7 +505,6 @@ class _DashboardScreenState
 
                     /// QUICK ACTIONS
                     const Text(
-
                       'Quick Actions',
                       style: TextStyle(
                         color:
@@ -523,7 +520,6 @@ class _DashboardScreenState
                         height: 20),
 
                     GridView.count(
-
                       shrinkWrap: true,
                       physics:
                           const NeverScrollableScrollPhysics(),
@@ -608,7 +604,6 @@ class _DashboardScreenState
                               .spaceBetween,
                       children: [
                         const Text(
-
                           'Nearby Hospital',
                           style:
                               TextStyle(
@@ -803,17 +798,14 @@ class _DashboardScreenState
     required String title,
 
     required VoidCallback onTap,
-
   }) {
     return InkWell(
-
       borderRadius:
           BorderRadius.circular(
         16,
       ),
       onTap: onTap,
       child: Container(
-
         padding:
             const EdgeInsets.all(
           14,
@@ -852,7 +844,6 @@ class _DashboardScreenState
             Expanded(
 
               child: Text(
-
                 title,
                 style:
                     const TextStyle(

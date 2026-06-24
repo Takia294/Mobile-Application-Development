@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'lifelink-a3cbe.firebasestorage.app',
     measurementId: 'G-6J4851T2C0',
   );
+
 }
