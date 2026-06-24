@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dashboard.dart';
+import 'find_donor.dart';
+import 'my_request.dart';
+import 'myprofile.dart';
+
+import '../services/request_database.dart';
+import 'dashboard.dart';
+import 'find_donor.dart';
+import 'my_request.dart';
+import 'myprofile.dart';
 
 import '../services/request_database.dart';
 import 'dashboard.dart';
@@ -69,22 +81,29 @@ class _EmergencyRequestScreenState
   Future<void> submitRequest() async {
     /// VALIDATION
     if (addressController.text.trim().isEmpty) {
+
       _showMessage('Please enter address');
+
       return;
     }
 
     if (selectedHospital == 'None') {
+
       _showMessage('Please select hospital');
+
       return;
     }
 
     if (selectedBloodGroup == 'None') {
+
       _showMessage('Please select blood group');
+
       return;
     }
 
     if (requestType == 'Organ Donation' && selectedOrgan == 'None') {
       _showMessage('Please select organ');
+
       return;
     }
 
@@ -131,24 +150,30 @@ class _EmergencyRequestScreenState
   void _showMessage(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+      SnackBar(
+        content: Text(msg),
+      ),
     );
   }
 
   @override
   void dispose() {
+
     addressController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5EEEE),
       appBar: AppBar(
         backgroundColor: Colors.red,
         elevation: 0,
         centerTitle: true,
+
         title: const Text(
           'Emergency Request',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -157,7 +182,9 @@ class _EmergencyRequestScreenState
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Container(
+
           padding: const EdgeInsets.all(18),
+
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -165,6 +192,7 @@ class _EmergencyRequestScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               const Center(
                 child: Text(
                   "Don't worry, We are there for you ❤️",
@@ -178,8 +206,11 @@ class _EmergencyRequestScreenState
               const Text('Request Type', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               _dropdownContainer(
+
                 DropdownButton<String>(
+
                   value: requestType,
+
                   isExpanded: true,
                   underline: const SizedBox(),
                   items: const [
@@ -196,6 +227,7 @@ class _EmergencyRequestScreenState
               const Text('Blood Group', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               _dropdownContainer(
+
                 DropdownButton<String>(
                   value: selectedBloodGroup,
                   isExpanded: true,
@@ -231,6 +263,7 @@ class _EmergencyRequestScreenState
               const Text('Choose Hospital', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               DropdownSearch<String>(
+
                 items: hospitals,
                 selectedItem: selectedHospital,
                 popupProps: const PopupProps.menu(
@@ -277,6 +310,7 @@ class _EmergencyRequestScreenState
               const Text('Urgency Level', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               _dropdownContainer(
+
                 DropdownButton<String>(
                   value: selectedUrgency,
                   isExpanded: true,
@@ -364,6 +398,7 @@ class _EmergencyRequestScreenState
         color: const Color(0xFFF3EFEF),
         borderRadius: BorderRadius.circular(12),
       ),
+
       child: child,
     );
   }

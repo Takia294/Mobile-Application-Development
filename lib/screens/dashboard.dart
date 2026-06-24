@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes/screen_routes.dart';
 
@@ -270,6 +271,7 @@ class _DashboardScreenState
       ),
 
       body: SafeArea(
+
         child: Column(
           children: [
             /// HEADER
@@ -313,6 +315,7 @@ class _DashboardScreenState
                       color:
                           Colors.white,
                       fontSize: 24,
+
                       fontWeight:
                           FontWeight
                               .w600,
@@ -356,6 +359,7 @@ class _DashboardScreenState
                       style:
                           const TextStyle(
                         fontSize: 24,
+
                         fontWeight:
                             FontWeight
                                 .bold,
@@ -401,6 +405,7 @@ class _DashboardScreenState
                       child: Row(
                         children: [
                           Expanded(
+
                             child: Column(
                               crossAxisAlignment:
                                   CrossAxisAlignment
@@ -431,14 +436,17 @@ class _DashboardScreenState
                                         14),
 
                                 ElevatedButton(
+
                                   style:
                                       ElevatedButton.styleFrom(
+
                                     backgroundColor:
                                         const Color(
                                       0xFFFF5757,
                                     ),
                                     shape:
                                         RoundedRectangleBorder(
+
                                       borderRadius:
                                           BorderRadius.circular(
                                         10,
@@ -544,6 +552,7 @@ class _DashboardScreenState
                           title:
                               'Book Request',
                           onTap: () {
+
                             Navigator.pushNamed(
                               context,
                               AppRoutes
@@ -608,7 +617,6 @@ class _DashboardScreenState
                                 18,
                           ),
                         ),
-
                         TextButton(
                           onPressed:
                               showHospitals,
@@ -650,6 +658,8 @@ class _DashboardScreenState
           ],
         ),
       ),
+    );
+  }
 
       /// BOTTOM NAVIGATION BAR
       bottomNavigationBar:
@@ -784,7 +794,9 @@ class _DashboardScreenState
   /// QUICK ACTION WIDGET
   Widget _quickAction({
     required IconData icon,
+
     required String title,
+
     required VoidCallback onTap,
   }) {
     return InkWell(
@@ -818,8 +830,11 @@ class _DashboardScreenState
         child: Row(
           children: [
             Icon(
+
               icon,
+
               size: 35,
+
               color: Colors.red,
             ),
 
@@ -827,6 +842,7 @@ class _DashboardScreenState
                 width: 10),
 
             Expanded(
+
               child: Text(
                 title,
                 style:
