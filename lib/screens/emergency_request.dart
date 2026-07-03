@@ -13,6 +13,7 @@ import 'find_donor.dart';
 import 'my_request.dart';
 import 'myprofile.dart';
 
+import '../services/hospital_service.dart';
 import '../services/request_database.dart';
 import 'dashboard.dart';
 import 'find_donor.dart';
@@ -56,23 +57,10 @@ class _EmergencyRequestScreenState
   ];
 
   /// HOSPITALS
-  final List<String> hospitals = [
-    'None',
-    'Dhaka Medical College Hospital - Dhaka',
-    'Square Hospital - Dhaka',
-    'Evercare Hospital - Dhaka',
-    'United Hospital - Dhaka',
-    'Bangabandhu Sheikh Mujib Medical University - Dhaka',
-    'National Institute of Kidney Diseases - Dhaka',
-    'Chittagong Medical College Hospital - Chattogram',
-    'Rajshahi Medical College Hospital - Rajshahi',
-    'Khulna Medical College Hospital - Khulna',
-    'Sylhet MAG Osmani Medical College Hospital - Sylhet',
-    'Mymensingh Medical College Hospital - Mymensingh',
-    'Rangpur Medical College Hospital - Rangpur',
-    'Sher-E-Bangla Medical College Hospital - Barishal',
-    'Cumilla Medical College Hospital - Cumilla',
-  ];
+  /// Sourced from HospitalService — the single master list (with
+  /// coordinates) shared with DashboardScreen's nearby-hospital
+  /// section, so the two never drift out of sync again.
+  final List<String> hospitals = ['None', ...HospitalService.displayNames];
 
   /// URGENCY LEVELS
   final List<String> urgencyLevels = ['Low', 'Medium', 'High', 'Critical'];

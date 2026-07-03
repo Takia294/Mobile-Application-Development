@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../routes/screen_routes.dart';
+import '../services/location_service.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -41,6 +42,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   String dob = '';
   String profileImageUrl = '';
   String certificateImageUrl = '';
+  double? latitude;
+  double? longitude;
+  bool isUpdatingLocation = false;
 
   @override
   void initState() {
@@ -73,6 +77,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           dob = data['dob'] ?? '';
           profileImageUrl = data['profileImage'] ?? '';
           certificateImageUrl = data['certificateImage'] ?? '';
+          latitude = (data['latitude'] as num?)?.toDouble();
+          longitude = (data['longitude'] as num?)?.toDouble();
         });
       }
     } catch (e) {
@@ -345,6 +351,37 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
+  // ── SHARE / UPDATE MY LOCATION ──
+  // Saves the donor's current GPS coordinates so FindDonorScreen's
+  // map can plot them and sort search results by real distance.
+  Future<void> _updateLocation() async {
+    setState(() => isUpdatingLocation = true);
+    try {
+      final pos = await LocationService.getCurrentPosition();
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return;
+
+      await _firestore.collection('users').doc(uid).update({
+        'latitude': pos.latitude,
+        'longitude': pos.longitude,
+        'locationUpdatedAt': Timestamp.now(),
+      });
+
+      if (mounted) {
+        setState(() {
+          latitude = pos.latitude;
+          longitude = pos.longitude;
+        });
+        _showSnackBar('Location shared! Donors near you can find you now.',
+            isSuccess: true);
+      }
+    } catch (e) {
+      _showSnackBar(e.toString());
+    } finally {
+      if (mounted) setState(() => isUpdatingLocation = false);
+    }
+  }
+
   // ── VIEW CERTIFICATE DIALOG ──
   void _viewCertificate() {
     if (certificateImageUrl.isEmpty) {
@@ -601,6 +638,46 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             bloodGroup.isNotEmpty ? bloodGroup : 'Not set'),
                         _detailRow(Icons.volunteer_activism_outlined, 'Donor Type',
                             donorType.isNotEmpty ? donorType : 'Not set'),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // My Location — powers the free map in Find Donors
+                    _sectionCard(
+                      title: 'My Location',
+                      icon: Icons.my_location_outlined,
+                      children: [
+                        _detailRow(
+                          Icons.pin_drop_outlined,
+                          'Status',
+                          (latitude != null && longitude != null)
+                              ? 'Shared — visible on the donor map'
+                              : 'Not shared yet',
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFFE53935)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: isUpdatingLocation ? null : _updateLocation,
+                            icon: isUpdatingLocation
+                                ? const SizedBox(
+                                    width: 16, height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.my_location, color: Color(0xFFE53935), size: 18),
+                            label: Text(
+                              (latitude != null)
+                                  ? 'Update My Location'
+                                  : 'Share My Location',
+                              style: const TextStyle(color: Color(0xFFE53935)),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 

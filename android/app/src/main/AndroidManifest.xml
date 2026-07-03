@@ -1,4 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Needed for Firestore, Firebase Auth, and OpenStreetMap tile loading -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Needed for donor location sharing + "nearby hospitals" / map (Find Donor) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!-- Needed for the "Call Now" button on donor contact cards -->
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+
     <application
         android:label="organ_and_blood_donation"
         android:name="${applicationName}"
@@ -40,6 +50,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Required so url_launcher's canLaunchUrl(tel:) works on Android 11+ -->
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
         </intent>
     </queries>
 </manifest>
