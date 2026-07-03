@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// USER SCREENS
 import '../screens/splash.dart';
 import '../screens/login.dart';
 import '../screens/registration.dart';
@@ -10,96 +9,56 @@ import '../screens/myprofile.dart';
 import '../screens/my_request.dart';
 import '../screens/notification.dart';
 import '../screens/find_donor.dart';
-
-/// ADMIN SCREEN
 import '../screens/admin_dashboard.dart';
 
 class AppRoutes {
-  /// USER ROUTES
-  static const String splash = '/';
-  static const String login = '/login';
-  static const String registration = '/registration';
-  static const String dashboard = '/dashboard';
+  // ── Route constants ──
+  static const String splash          = '/';
+  static const String login           = '/login';
+  static const String registration    = '/registration';
+  static const String dashboard       = '/dashboard';
   static const String emergencyRequest = '/emergency-request';
-  static const String myProfile = '/my-profile';
-  static const String myRequest = '/my-request';
-  static const String notification = '/notification';
-  static const String findDonor = '/find-donor';
+  static const String myProfile       = '/my-profile';
+  static const String myRequest       = '/my-request';
+  static const String notification    = '/notification';
+  static const String findDonor       = '/find-donor';
+  static const String adminDashboard  = '/admin-dashboard';
 
-  /// ADMIN ROUTE
-  static const String adminDashboard = '/admin-dashboard';
-
-  static Route<dynamic> generateRoute(
-    RouteSettings settings,
-  ) {
+  static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case splash:
-        return MaterialPageRoute(
-          builder: (_) => const SplashScreen(),
-        );
-
+        return _route(const SplashScreen());
       case login:
-        return MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        );
-
+        return _route(const LoginScreen());
       case registration:
-        return MaterialPageRoute(
-          builder: (_) => const RegistrationScreen(),
-        );
-
+        return _route(const RegistrationScreen());
       case dashboard:
-        return MaterialPageRoute(
-          builder: (_) => const DashboardScreen(),
-        );
-
+        return _route(const DashboardScreen());
       case emergencyRequest:
-        return MaterialPageRoute(
-          builder: (_) => const EmergencyRequestScreen(),
-        );
-
+        return _route(const EmergencyRequestScreen());
       case myProfile:
-        return MaterialPageRoute(
-          builder: (_) => const MyProfileScreen(),
-        );
-
+        return _route(const MyProfileScreen());
       case myRequest:
-        return MaterialPageRoute(
-          builder: (_) => const MyRequestScreen(),
-        );
-
+        return _route(const MyRequestScreen());
       case notification:
-        return MaterialPageRoute(
-          builder: (_) => const NotificationScreen(),
-        );
-
+        return _route(const NotificationScreen());
       case findDonor:
-        return MaterialPageRoute(
-          builder: (_) => const FindDonorScreen(),
-        );
-
-      /// ADMIN DASHBOARD
+        return _route(const FindDonorScreen());
       case adminDashboard:
-        return MaterialPageRoute(
-          builder: (_) => const AdminDashboardScreen(),
-        );
-
+        return _route(const AdminDashboardScreen());
       default:
-        return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Route Error'),
-            ),
-            body: Center(
-              child: Text(
-                'No route found for ${settings.name}',
-                style: const TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ),
-        );
+        return _route(_errorPage(settings.name));
     }
   }
+
+  static MaterialPageRoute _route(Widget page) =>
+      MaterialPageRoute(builder: (_) => page);
+
+  static Widget _errorPage(String? name) => Scaffold(
+        appBar: AppBar(title: const Text('Not Found')),
+        body: Center(
+          child: Text('No route for: $name',
+              style: const TextStyle(fontSize: 16)),
+        ),
+      );
 }

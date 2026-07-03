@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/request_model.dart';
+import '../services/notification_service.dart';
 import '../services/request_database.dart';
 import 'dashboard.dart';
 import 'emergency_request.dart';
@@ -528,6 +529,22 @@ class _MyRequestScreenState extends State<MyRequestScreen>
 
       // 2️⃣  Increment Today's Donations in admin_stats
       await RequestDatabase.incrementTodaysDonations();
+
+      // 3️⃣  Notify the user — shows up as a 'fulfilled' card on the
+      // Notification screen (see NotificationService / NotificationScreen).
+      try {
+        final uid = request.uid;
+        if (uid.isNotEmpty) {
+          await NotificationService.sendToUser(
+            uid: uid,
+            type: 'fulfilled',
+            title: 'Your ${request.requestType} request was fulfilled',
+            subtitle: 'Thank you for using LifeLink. Stay safe!',
+          );
+        }
+      } catch (_) {
+        // Non-critical — request status already updated successfully.
+      }
 
       if (!mounted) return;
 

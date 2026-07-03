@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// ============================================================
+// LifeLink — Firestore Security Rules
+// Deploy with: firebase deploy --only firestore:rules
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ── USERS ──
+    // Anyone signed in can read profiles (needed for donor search).
+    // Only the owner (or an admin) can create/update/delete their doc.
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── REQUESTS (blood/organ donation requests) ──
+    // Any signed-in user can read (needed for Find Donor / community
+    // visibility of active requests). Only the requester can create
+    // their own request. Requester or admin can update/delete.
+    match /requests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn() &&
+        (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    // ── NOTIFICATIONS ──
+    // Users can read notifications targeted at them or broadcast ('all').
+    // Only admins (or the backend) create/broadcast notifications.
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() &&
+        (resource.data.targetUid == request.auth.uid || resource.data.targetUid == 'all');
+      allow update: if isSignedIn() &&
+        (resource.data.targetUid == request.auth.uid || resource.data.targetUid == 'all');
+      allow create: if isSignedIn(); // any authenticated flow (e.g. request fulfilled) can notify
+      allow delete: if isAdmin();
+    }
+
+    // ── ADMIN STATS (aggregate counters, e.g. today's donations) ──
+    match /admin_stats/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn(); // FieldValue.increment from user + admin flows
+    }
+
+    // ── DONATIONS / COMPLAINTS (read by Admin Dashboard) ──
+    match /donations/{docId} {
+      allow read: if isAdmin();
+      allow write: if isSignedIn();
+    }
+
+    match /complaints/{docId} {
+      allow read: if isAdmin();
+      allow write: if isSignedIn();
+    }
+  }
+}

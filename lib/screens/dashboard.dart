@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../routes/screen_routes.dart';
+import '../models/hospital_model.dart';
+import '../services/hospital_service.dart';
+import '../services/location_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -25,49 +28,33 @@ class _DashboardScreenState
   /// CURRENT BOTTOM NAV INDEX
   int currentIndex = 0;
 
-  /// HOSPITAL LIST
-  final List<Map<String, String>>
-      hospitals = [
-    {
-      "name":
-          "Dhaka Medical College Hospital",
-      "distance":
-          "2.5 Km away - Open 24/7",
-    },
-    {
-      "name": "Square Hospital",
-      "distance":
-          "3 Km away - Open 24/7",
-    },
-    {
-      "name":
-          "Evercare Hospital Dhaka",
-      "distance":
-          "4 Km away - Open 24/7",
-    },
-    {
-      "name": "United Hospital",
-      "distance":
-          "5 Km away - Open 24/7",
-    },
-    {
-      "name":
-          "Popular Diagnostic Center",
-      "distance":
-          "2 Km away - Open",
-    },
-    {
-      "name": "Ibn Sina Hospital",
-      "distance":
-          "3.2 Km away - Open",
-    },
-  ];
+  /// USER'S GPS POSITION (used to compute real distances to hospitals)
+  double? _myLat;
+  double? _myLng;
+
+  /// NEAREST HOSPITALS — computed from HospitalService's master list
+  /// (same source EmergencyRequestScreen uses) so this never drifts
+  /// out of sync with the hospital picker again. Falls back to the
+  /// full list, unsorted, if location isn't available yet.
+  List<MapEntry<HospitalModel, double?>> get nearestHospitals {
+    if (_myLat != null && _myLng != null) {
+      return HospitalService.nearestTo(
+        latitude: _myLat!,
+        longitude: _myLng!,
+        limit: HospitalService.hospitals.length,
+      ).map((e) => MapEntry(e.key, e.value)).toList();
+    }
+    return HospitalService.hospitals
+        .map((h) => MapEntry(h, null))
+        .toList();
+  }
 
   @override
   void initState() {
     super.initState();
 
     loadUserName();
+    _loadLocation();
 
     /// AUTO GREETING UPDATE
     _timer = Timer.periodic(
@@ -78,6 +65,21 @@ class _DashboardScreenState
         }
       },
     );
+  }
+
+  /// LOAD GPS LOCATION (best-effort — dashboard still works fine
+  /// without it, just shows hospitals unsorted).
+  Future<void> _loadLocation() async {
+    try {
+      final pos = await LocationService.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _myLat = pos.latitude;
+        _myLng = pos.longitude;
+      });
+    } catch (_) {
+      // Silently ignore — permission may be denied.
+    }
   }
 
   @override
@@ -180,8 +182,8 @@ class _DashboardScreenState
             const SizedBox(
                 height: 20),
 
-            ...hospitals.map(
-              (hospital) =>
+            ...nearestHospitals.map(
+              (entry) =>
                   Card(
                 elevation: 2,
                 child: ListTile(
@@ -199,10 +201,12 @@ class _DashboardScreenState
                     ),
                   ),
                   title: Text(
-                    hospital["name"]!,
+                    entry.key.name,
                   ),
                   subtitle: Text(
-                    hospital["distance"]!,
+                    entry.value != null
+                        ? '${LocationService.formatDistance(entry.value)} - ${entry.key.city}'
+                        : entry.key.city,
                   ),
                 ),
               ),
@@ -628,21 +632,17 @@ class _DashboardScreenState
                       ],
                     ),
 
-                    hospitalCard(
-                      "Square Hospital",
-                      "3 Km away - Open 24/7",
+                    ...nearestHospitals.take(2).map(
+                      (entry) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: hospitalCard(
+                          entry.key.name,
+                          entry.value != null
+                              ? '${LocationService.formatDistance(entry.value)} - ${entry.key.city}'
+                              : entry.key.city,
+                        ),
+                      ),
                     ),
-
-                    const SizedBox(
-                        height: 12),
-
-                    hospitalCard(
-                      "Evercare Hospital",
-                      "4 Km away - Open 24/7",
-                    ),
-
-                    const SizedBox(
-                        height: 20),
                   ],
                 ),
               ),

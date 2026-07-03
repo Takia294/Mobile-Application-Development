@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   /// LOGO
                   Image.asset(
-                    'lib/screens/logo.png',
+                    'assets/images/logo.png',
                     height: 90,
                     errorBuilder: (context, error, stackTrace) {
                       return const Icon(

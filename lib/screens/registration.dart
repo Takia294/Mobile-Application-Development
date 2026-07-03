@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../routes/screen_routes.dart';
+import '../services/location_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({
@@ -33,6 +34,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
   bool isLoading = false;
+  bool shareLocation = true; // helps donors be found on the map later
 
   @override
   void dispose() {
@@ -79,8 +81,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       /// USER ID
       String uid = userCredential.user!.uid;
 
+      /// TRY TO GET GPS LOCATION (non-blocking — registration still
+      /// succeeds even if the user denies permission or GPS is off).
+      /// This is what lets the free map in Find Donors show this
+      /// donor's pin once they later set a donor type in My Profile.
+      double? latitude;
+      double? longitude;
+      if (shareLocation) {
+        try {
+          final pos = await LocationService.getCurrentPosition();
+          latitude = pos.latitude;
+          longitude = pos.longitude;
+        } catch (_) {
+          // Silently skip — user can share location later from My Profile.
+        }
+      }
+
       /// SAVE USER DATA IN FIRESTORE
       /// role: 'user' by default
+      /// donorType uses the canonical value 'None' — the same value
+      /// FindDonorScreen/DonorService checks against, so filters stay
+      /// consistent app-wide.
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         "uid": uid,
         "fullName": fullNameController.text.trim(),
@@ -95,10 +116,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ? "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"
             : "",
         "bloodGroup": "",
-        "donorType": "",
+        "donorType": "None",
         "profileImage": "",
         "certificateImage": "",
-        "role": "user", // ← নতুন: login এ role check করার জন্য
+        "role": "user", // ← login এ role check করার জন্য
+        if (latitude != null) "latitude": latitude,
+        if (longitude != null) "longitude": longitude,
+        if (latitude != null) "locationUpdatedAt": Timestamp.now(),
         "createdAt": Timestamp.now(),
       });
 
@@ -355,7 +379,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     isConfirmPassword: true,
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+
+                  /// SHARE LOCATION TOGGLE
+                  /// Lets nearby patients find this user on the free
+                  /// donor map later, once they set a donor type.
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: shareLocation,
+                          activeColor: const Color(0xFFE53935),
+                          onChanged: (v) =>
+                              setState(() => shareLocation = v ?? true),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () =>
+                                setState(() => shareLocation = !shareLocation),
+                            child: const Text(
+                              "Share my location so nearby patients can find me on the donor map",
+                              style: TextStyle(fontSize: 12.5, color: Colors.black54),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
 
                   /// REGISTER BUTTON
                   SizedBox(
