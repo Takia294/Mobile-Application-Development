@@ -51,8 +51,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 /// LOGO (use your image)
                 Image.asset(
-                  'lib/screens/logo.png', // 👈 IMPORTANT
+                  'assets/images/logo.png',
                   width: 120,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.favorite,
+                      color: Color(0xFFE53935),
+                      size: 100,
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 20),
