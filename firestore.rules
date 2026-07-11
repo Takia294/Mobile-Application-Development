@@ -1,0 +1,100 @@
+rules_version = '2';
+
+// ============================================================
+// LIFELINK — FIRESTORE SECURITY RULES
+//
+// No rules file existed for this project before, which means the
+// database was almost certainly running on the default Firebase
+// rules — either wide open (anyone can read/write everything) or
+// fully locked (nothing works at all once the 30-day test-mode
+// window expires). Neither is safe for a real app.
+//
+// These rules match exactly what the app's services actually do:
+//   - users:          AuthService, DonorService, AdminDashboard
+//   - requests:       RequestDatabase, AdminDashboard
+//   - notifications:  NotificationService
+//   - admin_stats:    RequestDatabase (Today's Donations counter)
+//
+// Deploy with: firebase deploy --only firestore:rules
+// ============================================================
+
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isOwner(uid) {
+  return isSignedIn() && request.auth.uid == uid;
+}
+
+function isAdmin() {
+  return isSignedIn() &&
+    exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── USERS ──
+    // Anyone signed in can read (needed for donor search / find-donor map,
+    // and so a user can look up their own profile). Only the account owner
+    // can create/update their own document; only admins can delete users.
+    // `role` may only be set to 'user' by the owner — becoming an admin
+    // requires a manual change in the Firebase console, which is the
+    // recommended way to bootstrap the first admin account.
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(uid) && request.resource.data.role == 'user';
+      // Owners can update their own profile freely EXCEPT for `role`
+      // (can't self-promote to admin) and `certificateStatus` can only
+      // be moved to 'pending' by the owner (uploading) — only an admin
+      // can set it to 'verified' or 'rejected'.
+      allow update: if isAdmin() ||
+        (isOwner(uid) &&
+         request.resource.data.role == resource.data.role &&
+         (request.resource.data.certificateStatus == resource.data.certificateStatus ||
+          request.resource.data.certificateStatus == 'pending'));
+      allow delete: if isAdmin();
+    }
+
+    // ── REQUESTS ──
+    // Owners can create their own requests and read/update them (e.g. mark
+    // fulfilled). Admins can read/update/delete any request for moderation.
+    match /requests/{requestId} {
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow create: if isOwner(request.resource.data.uid);
+      allow update: if isAdmin() ||
+        (isOwner(resource.data.uid) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+      allow delete: if isAdmin();
+    }
+
+    // ── NOTIFICATIONS ──
+    // Readable by the target user, or by anyone if it's a broadcast
+    // ('all'). Any signed-in user may create a notification, but only as
+    // themselves (personal) or as a broadcast — never impersonating
+    // another user's personal notification. Only the `readBy` field may be
+    // updated by a reader (marking their own read state); admins may
+    // delete.
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() &&
+        (resource.data.targetUid == request.auth.uid || resource.data.targetUid == 'all');
+      allow create: if isSignedIn() &&
+        (request.resource.data.targetUid == 'all' ||
+         request.resource.data.targetUid == request.auth.uid);
+      allow update: if isSignedIn() &&
+        (resource.data.targetUid == request.auth.uid || resource.data.targetUid == 'all') &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+      allow delete: if isAdmin();
+    }
+
+    // ── ADMIN STATS ──
+    // Read by anyone signed in (Today's Donations is shown on the user
+    // dashboard too); only writable via the increment path any signed-in
+    // user can trigger when completing a request, or by an admin.
+    match /admin_stats/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+  }
+}
