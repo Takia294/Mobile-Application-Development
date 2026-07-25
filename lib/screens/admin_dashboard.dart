@@ -3,6 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/request_model.dart';
+<<<<<<< HEAD
+import '../services/notification_service.dart';
+import '../services/push_notification_service.dart';
+=======
+>>>>>>> main
 import '../services/request_database.dart';
 import '../routes/screen_routes.dart';
 
@@ -19,6 +24,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ── Live snapshot caches ──
   List<QueryDocumentSnapshot> _users = [];
   List<RequestModel> _requests = [];
+<<<<<<< HEAD
+  int _todayDonationsLive = 0;
+
+  // ── Stream error state ──
+  // Surfaced as a dismissible banner rather than silently failing —
+  // e.g. if a Firestore rules change accidentally locks admins out,
+  // this is how an admin would actually find out why the dashboard
+  // stopped updating instead of just seeing stale data forever.
+  String? _streamError;
+
+  // ── Subscriptions ──
+  final List<StreamSubscription> _subs = [];
+
+  // ── Bound how many docs the admin dashboard reads live ──
+  // Keeps this screen fast and cheap even as the users/requests
+  // collections grow into the thousands.
+  static const int _usersLimit = 500;
+
+=======
   List<QueryDocumentSnapshot> _donations = [];
   List<QueryDocumentSnapshot> _complaints = [];
   int _todayDonationsLive = 0;
@@ -26,6 +50,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ── Subscriptions ──
   final List<StreamSubscription> _subs = [];
 
+>>>>>>> main
   // ── Search ──
   final _searchCtrl = TextEditingController();
   String _searchQuery = '';
@@ -38,6 +63,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void initState() {
     super.initState();
     _subscribeAll();
+<<<<<<< HEAD
+    PushNotificationService.init();
+=======
+>>>>>>> main
     // Rebuild every second so "last updated X seconds ago" stays live
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
@@ -45,13 +74,43 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   void _subscribeAll() {
+<<<<<<< HEAD
+    _subs.add(_db
+        .collection('users')
+        .orderBy('createdAt', descending: true)
+        .limit(_usersLimit)
+        .snapshots()
+        .listen(
+      (s) {
+        if (mounted) {
+          setState(() { _users = s.docs; _lastRefresh = DateTime.now(); _streamError = null; });
+        }
+      },
+      onError: (e) {
+        if (mounted) setState(() => _streamError = 'Users list: ${e.toString()}');
+      },
+    ));
+=======
     _subs.add(_db.collection('users').snapshots().listen((s) {
       if (mounted) setState(() { _users = s.docs; _lastRefresh = DateTime.now(); });
     }));
+>>>>>>> main
 
     // ── Requests: go through RequestDatabase so this screen and the
     // ── user app (MyRequestScreen / EmergencyRequestScreen) always
     // ── agree on shape + status values (Active/Pending/Critical/Fulfilled).
+<<<<<<< HEAD
+    _subs.add(RequestDatabase.streamAllRequests().listen(
+      (reqs) {
+        if (mounted) {
+          setState(() { _requests = reqs; _lastRefresh = DateTime.now(); _streamError = null; });
+        }
+      },
+      onError: (e) {
+        if (mounted) setState(() => _streamError = 'Requests: ${e.toString()}');
+      },
+    ));
+=======
     _subs.add(RequestDatabase.streamAllRequests().listen((reqs) {
       if (mounted) setState(() { _requests = reqs; _lastRefresh = DateTime.now(); });
     }));
@@ -62,6 +121,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _subs.add(_db.collection('complaints').snapshots().listen((s) {
       if (mounted) setState(() { _complaints = s.docs; _lastRefresh = DateTime.now(); });
     }));
+>>>>>>> main
 
     // ── Today's Donations: this is the SAME counter that
     // ── RequestDatabase.incrementTodaysDonations() bumps when a user
@@ -69,9 +129,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     // ── RequestDatabase.streamTodaysDonationCount() keeps both screens
     // ── pointed at the exact same Firestore document, so the stat card
     // ── updates live the moment a request is completed.
+<<<<<<< HEAD
+    _subs.add(RequestDatabase.streamTodaysDonationCount().listen(
+      (count) {
+        if (mounted) {
+          setState(() { _todayDonationsLive = count; _lastRefresh = DateTime.now(); });
+        }
+      },
+      onError: (e) {
+        if (mounted) setState(() => _streamError = 'Donation count: ${e.toString()}');
+      },
+    ));
+=======
     _subs.add(RequestDatabase.streamTodaysDonationCount().listen((count) {
       if (mounted) setState(() { _todayDonationsLive = count; _lastRefresh = DateTime.now(); });
     }));
+>>>>>>> main
   }
 
   @override
@@ -87,9 +160,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ────────────────────────────────────────────
   int get _totalUsers => _users.length;
   int get _activeRequests =>
+<<<<<<< HEAD
+      _requests.where((r) => r.displayStatus == 'Active').length;
+
+  // BUG FIX: this used to read a `complaints` collection that nothing in
+  // the app ever writes to, so the card always silently showed 0. Now it
+  // shows Critical requests, which is real, live data that admins actually
+  // need to act on urgently.
+  int get _criticalRequests =>
+      _requests.where((r) => r.displayStatus == 'Critical' || (r.urgency == 'Critical' && !r.isStale)).length;
+=======
       _requests.where((r) => r.status == 'Active').length;
   int get _pendingComplaints =>
       _complaints.where((c) => (c['status'] ?? '') == 'Pending').length;
+>>>>>>> main
 
   // Today's donations now comes live from RequestDatabase (see _subscribeAll),
   // fed by RequestDatabase.incrementTodaysDonations() whenever a user marks
@@ -103,15 +187,53 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return '${diff}s ago';
   }
 
+<<<<<<< HEAD
+  // BUG FIX: QueryDocumentSnapshot's `[]` operator throws a StateError if
+  // the field doesn't exist on that document at all — unlike a normal
+  // Dart Map, which just returns null. Any user document created before
+  // a field like `certificateStatus` was added to the schema doesn't
+  // have that key yet, so `u['certificateStatus']` was crashing the
+  // whole Admin Dashboard the moment it hit an older account. This reads
+  // through `.data()` (a plain Map) instead, which never throws.
+  dynamic _field(QueryDocumentSnapshot doc, String key) {
+    final data = doc.data() as Map<String, dynamic>?;
+    return data?[key];
+  }
+
+  List<QueryDocumentSnapshot> get _filteredUsers {
+    if (_searchQuery.isEmpty) return _users;
+    return _users.where((u) {
+      final name = (_field(u, 'fullName') ?? '').toString().toLowerCase();
+      final email = (_field(u, 'email') ?? '').toString().toLowerCase();
+=======
   List<QueryDocumentSnapshot> get _filteredUsers {
     if (_searchQuery.isEmpty) return _users;
     return _users.where((u) {
       final name = (u['fullName'] ?? '').toString().toLowerCase();
       final email = (u['email'] ?? '').toString().toLowerCase();
+>>>>>>> main
       return name.contains(_searchQuery) || email.contains(_searchQuery);
     }).toList();
   }
 
+<<<<<<< HEAD
+  List<QueryDocumentSnapshot> get _pendingCertificates =>
+      _users.where((u) => (_field(u, 'certificateStatus') ?? '') == 'pending').toList();
+
+  // BUG FIX: this used to tally a `donations` collection that nothing in
+  // the app ever writes to, so the "Monthly Donations" chart always showed
+  // all zeros. Fulfilled requests ARE the real donation records (the same
+  // ones that bump the Today's Donations counter), so we derive the chart
+  // from those instead — only counting requests created in the current year.
+  Map<int, int> get _monthlyDonations {
+    final map = <int, int>{for (int i = 1; i <= 12; i++) i: 0};
+    final thisYear = DateTime.now().year;
+    for (final r in _requests) {
+      if (r.status != 'Fulfilled') continue;
+      final date = r.createdAt.toDate();
+      if (date.year != thisYear) continue;
+      map[date.month] = (map[date.month] ?? 0) + 1;
+=======
   Map<int, int> get _monthlyDonations {
     final map = <int, int>{for (int i = 1; i <= 12; i++) i: 0};
     for (final d in _donations) {
@@ -120,6 +242,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         final m = ts.toDate().month;
         map[m] = (map[m] ?? 0) + 1;
       }
+>>>>>>> main
     }
     return map;
   }
@@ -130,6 +253,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _logout() async {
     final ok = await _confirmDialog('Logout', 'Are you sure you want to logout?');
     if (ok) {
+<<<<<<< HEAD
+      await PushNotificationService.clearTokenOnLogout();
+=======
+>>>>>>> main
       await FirebaseAuth.instance.signOut();
       if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
@@ -166,6 +293,35 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+<<<<<<< HEAD
+  Future<void> _reviewCertificate(String uid, String name, bool approve) async {
+    final status = approve ? 'verified' : 'rejected';
+    await _db.collection('users').doc(uid).update({'certificateStatus': status});
+
+    try {
+      await NotificationService.sendToUser(
+        uid: uid,
+        type: approve ? 'fulfilled' : 'info',
+        title: approve
+            ? 'Your donor certificate was verified ✓'
+            : 'Your donor certificate needs a re-upload',
+        subtitle: approve
+            ? 'Thanks for confirming your donor status with LifeLink.'
+            : 'Please upload a clearer photo of your certificate from My Profile.',
+      );
+    } catch (_) {
+      // Non-critical — the verification status itself was already saved.
+    }
+
+    _snack(
+      approve ? 'Certificate approved for $name' : 'Certificate rejected for $name',
+      isSuccess: approve,
+      isError: !approve,
+    );
+  }
+
+=======
+>>>>>>> main
   Future<bool> _confirmDialog(String title, String body) async {
     final result = await showDialog<bool>(
       context: context,
@@ -216,6 +372,43 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+<<<<<<< HEAD
+              // Stream error banner — only shows if a live listener
+              // (users / requests / donation count) fails, e.g. a
+              // Firestore rules or connectivity issue. Dismissible so
+              // it doesn't block the rest of the (possibly still
+              // partially working) dashboard.
+              if (_streamError != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEBEE),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE53935).withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Color(0xFFE53935), size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _streamError!,
+                          style: const TextStyle(color: Color(0xFFB71C1C), fontSize: 12),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18, color: Color(0xFFE53935)),
+                        onPressed: () => setState(() => _streamError = null),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+
+=======
+>>>>>>> main
               // Live status chip
               _liveChip(),
               const SizedBox(height: 14),
@@ -231,6 +424,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _userManagementCard(),
               const SizedBox(height: 18),
 
+<<<<<<< HEAD
+              // Certificate verification — only shown when there's something
+              // to review, so it doesn't clutter the dashboard otherwise.
+              if (_pendingCertificates.isNotEmpty) ...[
+                _sectionHeader('Certificate Verification', Icons.verified_outlined,
+                    subtitle: '${_pendingCertificates.length} pending'),
+                const SizedBox(height: 10),
+                _certificateVerificationCard(),
+                const SizedBox(height: 18),
+              ],
+
+=======
+>>>>>>> main
               // Request monitoring
               _sectionHeader('Request Monitoring', Icons.monitor_heart_outlined,
                   subtitle: '${_requests.length} total'),
@@ -269,8 +475,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       actions: [
         IconButton(
+<<<<<<< HEAD
+          icon: const Icon(Icons.campaign_outlined, color: Colors.white),
+          tooltip: 'Send Alert',
+          onPressed: _showSendAlertDialog,
+=======
           icon: const Icon(Icons.settings_outlined, color: Colors.white),
           onPressed: () => _snack('Settings coming soon'),
+>>>>>>> main
         ),
         IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
@@ -321,7 +533,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       _StatData('Total Users', _totalUsers, Icons.people, Colors.blue),
       _StatData('Active Requests', _activeRequests, Icons.list_alt, const Color(0xFFE53935)),
       _StatData("Today's Donations", _todayDonations, Icons.favorite, Colors.green),
+<<<<<<< HEAD
+      _StatData('Critical Requests', _criticalRequests, Icons.warning_amber_rounded, Colors.orange),
+=======
       _StatData('Pending Complaints', _pendingComplaints, Icons.warning_amber_rounded, Colors.orange),
+>>>>>>> main
     ];
 
     return GridView.builder(
@@ -430,8 +646,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   itemBuilder: (_, i) {
                     final u = _filteredUsers[i];
                     final uid = u.id;
+<<<<<<< HEAD
+                    final name = (_field(u, 'fullName') ?? 'Unknown').toString();
+                    final blood = (_field(u, 'bloodGroup') ?? '').toString();
+=======
                     final name = (u['fullName'] ?? 'Unknown').toString();
                     final blood = (u['bloodGroup'] ?? '').toString();
+>>>>>>> main
                     final initials = name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
                     return Padding(
@@ -462,7 +683,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                               fontSize: 12, fontWeight: FontWeight.w600)),
+<<<<<<< HEAD
+                                      Text((_field(u, 'email') ?? '').toString(),
+=======
                                       Text((u['email'] ?? '').toString(),
+>>>>>>> main
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                               fontSize: 10, color: Colors.grey)),
@@ -534,6 +759,77 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   // ────────────────────────────────────────────
+<<<<<<< HEAD
+  // Certificate Verification Card
+  // ────────────────────────────────────────────
+  Widget _certificateVerificationCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8)],
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(10),
+        itemCount: _pendingCertificates.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (_, i) {
+          final u = _pendingCertificates[i];
+          final uid = u.id;
+          final name = (_field(u, 'fullName') ?? 'Unknown').toString();
+          final certUrl = (_field(u, 'certificateImage') ?? '').toString();
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: certUrl.isEmpty
+                      ? null
+                      : () => showDialog(
+                            context: context,
+                            builder: (_) => Dialog(
+                              child: Image.network(certUrl, fit: BoxFit.contain),
+                            ),
+                          ),
+                  child: Container(
+                    width: 48, height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: certUrl.isEmpty
+                        ? const Icon(Icons.image_outlined, color: Colors.grey)
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(certUrl, fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.broken_image, color: Colors.grey)),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(name,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis),
+                ),
+                _miniBtn('Approve', Colors.green, () => _reviewCertificate(uid, name, true)),
+                const SizedBox(width: 6),
+                _miniBtn('Reject', Colors.red, () => _reviewCertificate(uid, name, false)),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────
+=======
+>>>>>>> main
   // Request Monitoring Card
   // ────────────────────────────────────────────
   Widget _requestMonitoringCard() {
@@ -564,7 +860,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   itemBuilder: (_, i) {
                     final req = _requests[i];
                     final docId = req.id;
+<<<<<<< HEAD
+                    final status = req.displayStatus;
+=======
                     final status = req.status;
+>>>>>>> main
                     final type = req.requestType;
                     final details = req.requestType == 'Organ Donation'
                         ? req.organ
@@ -781,6 +1081,80 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ────────────────────────────────────────────
   // Dialogs / Sheets
   // ────────────────────────────────────────────
+<<<<<<< HEAD
+  void _showSendAlertDialog() {
+    final titleCtrl = TextEditingController();
+    final subtitleCtrl = TextEditingController();
+    String type = 'event';
+    bool sending = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialog) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Send Alert to All Users'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: type,
+                  decoration: const InputDecoration(labelText: 'Type'),
+                  items: const [
+                    DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
+                    DropdownMenuItem(value: 'event', child: Text('Event')),
+                    DropdownMenuItem(value: 'info', child: Text('Info')),
+                  ],
+                  onChanged: (v) => setDialog(() => type = v ?? 'event'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: titleCtrl,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: subtitleCtrl,
+                  decoration: const InputDecoration(labelText: 'Subtitle (optional)'),
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE53935)),
+              onPressed: sending
+                  ? null
+                  : () async {
+                      if (titleCtrl.text.trim().isEmpty) return;
+                      setDialog(() => sending = true);
+                      try {
+                        await NotificationService.sendBroadcast(
+                          type: type,
+                          title: titleCtrl.text.trim(),
+                          subtitle: subtitleCtrl.text.trim(),
+                        );
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        _snack('Alert sent to all users', isSuccess: true);
+                      } catch (e) {
+                        setDialog(() => sending = false);
+                        _snack('Failed to send alert: $e', isError: true);
+                      }
+                    },
+              child: Text(sending ? 'Sending…' : 'Send',
+                  style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+=======
+>>>>>>> main
   void _showUserInfo(QueryDocumentSnapshot user) {
     showDialog(
       context: context,
@@ -792,7 +1166,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
+<<<<<<< HEAD
+                (_field(user, 'fullName') ?? 'User Info').toString(),
+=======
                 (user['fullName'] ?? 'User Info').toString(),
+>>>>>>> main
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
@@ -803,6 +1181,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+<<<<<<< HEAD
+              _dlgRow(Icons.email_outlined, 'Email', _field(user, 'email')),
+              _dlgRow(Icons.phone_outlined, 'Phone', _field(user, 'phone')),
+              _dlgRow(Icons.bloodtype_outlined, 'Blood Group', _field(user, 'bloodGroup')),
+              _dlgRow(Icons.cake_outlined, 'DOB', _field(user, 'dob')),
+              _dlgRow(Icons.wc_outlined, 'Gender', _field(user, 'gender')),
+              _dlgRow(Icons.location_on_outlined, 'City', _field(user, 'city')),
+              _dlgRow(Icons.volunteer_activism_outlined, 'Donor Type', _field(user, 'donorType')),
+=======
               _dlgRow(Icons.email_outlined, 'Email', user['email']),
               _dlgRow(Icons.phone_outlined, 'Phone', user['phone']),
               _dlgRow(Icons.bloodtype_outlined, 'Blood Group', user['bloodGroup']),
@@ -810,6 +1197,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _dlgRow(Icons.wc_outlined, 'Gender', user['gender']),
               _dlgRow(Icons.location_on_outlined, 'City', user['city']),
               _dlgRow(Icons.volunteer_activism_outlined, 'Donor Type', user['donorType']),
+>>>>>>> main
             ],
           ),
         ),
@@ -843,7 +1231,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const Text('Update Request Status',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
+<<<<<<< HEAD
+            for (final s in ['Active', 'Pending', 'Critical', 'Fulfilled', 'Expired'])
+=======
             for (final s in ['Active', 'Pending', 'Critical', 'Fulfilled'])
+>>>>>>> main
               ListTile(
                 leading: CircleAvatar(
                     radius: 8, backgroundColor: _statusColor(s)),
@@ -881,6 +1273,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 'active': return Colors.green;
       case 'critical': return Colors.red;
       case 'fulfilled': return Colors.blue;
+<<<<<<< HEAD
+      case 'expired': return Colors.grey;
+=======
+>>>>>>> main
       default: return Colors.orange;
     }
   }

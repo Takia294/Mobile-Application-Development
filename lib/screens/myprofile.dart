@@ -8,6 +8,10 @@ import 'package:image_picker/image_picker.dart';
 
 import '../routes/screen_routes.dart';
 import '../services/location_service.dart';
+<<<<<<< HEAD
+import '../services/push_notification_service.dart';
+=======
+>>>>>>> main
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -42,6 +46,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   String dob = '';
   String profileImageUrl = '';
   String certificateImageUrl = '';
+<<<<<<< HEAD
+  String certificateStatus = 'none'; // 'none' | 'pending' | 'verified' | 'rejected'
+  bool isAvailable = true;
+  bool isTogglingAvailability = false;
+=======
+>>>>>>> main
   double? latitude;
   double? longitude;
   bool isUpdatingLocation = false;
@@ -77,6 +87,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           dob = data['dob'] ?? '';
           profileImageUrl = data['profileImage'] ?? '';
           certificateImageUrl = data['certificateImage'] ?? '';
+<<<<<<< HEAD
+          certificateStatus = data['certificateStatus'] ?? 'none';
+          isAvailable = data['isAvailable'] ?? true;
+=======
+>>>>>>> main
           latitude = (data['latitude'] as num?)?.toDouble();
           longitude = (data['longitude'] as num?)?.toDouble();
         });
@@ -107,7 +122,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     setState(() => isUploadingProfile = true);
 
     final uid = _auth.currentUser?.uid;
+<<<<<<< HEAD
+    if (uid == null) {
+      if (mounted) setState(() => isUploadingProfile = false);
+      return;
+    }
+=======
     if (uid == null) return;
+>>>>>>> main
 
     final url = await _uploadImageToStorage(image, 'profiles/$uid/profile.jpg');
 
@@ -130,14 +152,35 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     setState(() => isUploadingCertificate = true);
 
     final uid = _auth.currentUser?.uid;
+<<<<<<< HEAD
+    if (uid == null) {
+      if (mounted) setState(() => isUploadingCertificate = false);
+      return;
+    }
+=======
     if (uid == null) return;
+>>>>>>> main
 
     final url = await _uploadImageToStorage(image, 'profiles/$uid/certificate.jpg');
 
     if (url != null) {
+<<<<<<< HEAD
+      await _firestore.collection('users').doc(uid).update({
+        'certificateImage': url,
+        'certificateStatus': 'pending',
+      });
+      if (mounted) {
+        setState(() {
+          certificateImageUrl = url;
+          certificateStatus = 'pending';
+        });
+      }
+      _showSnackBar('Certificate uploaded! Pending admin verification.', isSuccess: true);
+=======
       await _firestore.collection('users').doc(uid).update({'certificateImage': url});
       if (mounted) setState(() => certificateImageUrl = url);
       _showSnackBar('Certificate uploaded!', isSuccess: true);
+>>>>>>> main
     } else {
       _showSnackBar('Failed to upload certificate');
     }
@@ -332,6 +375,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
 
     if (confirm == true) {
+<<<<<<< HEAD
+      await PushNotificationService.clearTokenOnLogout();
+=======
+>>>>>>> main
       await _auth.signOut();
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, AppRoutes.login);
@@ -351,6 +398,32 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
+<<<<<<< HEAD
+  // ── TOGGLE DONOR AVAILABILITY ──
+  // Lets a donor temporarily hide from FindDonorScreen search/map
+  // (e.g. sick, traveling, already donated recently) without losing
+  // their saved blood group / donor type.
+  Future<void> _toggleAvailability(bool value) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    setState(() => isTogglingAvailability = true);
+    try {
+      await _firestore.collection('users').doc(uid).update({'isAvailable': value});
+      if (mounted) setState(() => isAvailable = value);
+      _showSnackBar(
+        value ? "You're visible to donor search again" : "You're hidden from donor search",
+        isSuccess: true,
+      );
+    } catch (e) {
+      _showSnackBar('Failed to update availability');
+    } finally {
+      if (mounted) setState(() => isTogglingAvailability = false);
+    }
+  }
+
+=======
+>>>>>>> main
   // ── SHARE / UPDATE MY LOCATION ──
   // Saves the donor's current GPS coordinates so FindDonorScreen's
   // map can plot them and sort search results by real distance.
@@ -631,6 +704,67 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
+<<<<<<< HEAD
+                        ),
+                      ),
+                      children: [
+                        _detailRow(Icons.bloodtype_outlined, 'Blood Group',
+                            bloodGroup.isNotEmpty ? bloodGroup : 'Not set'),
+                        _detailRow(Icons.volunteer_activism_outlined, 'Donor Type',
+                            donorType.isNotEmpty ? donorType : 'Not set'),
+                        if (donorType.isNotEmpty && donorType != 'None') ...[
+                          const Divider(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Available to Donate',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600, fontSize: 13)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      isAvailable
+                                          ? 'Visible in donor search & map'
+                                          : 'Hidden from donor search & map',
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          color: isAvailable ? Colors.green : Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              isTogglingAvailability
+                                  ? const SizedBox(
+                                      width: 20, height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2))
+                                  : Switch(
+                                      value: isAvailable,
+                                      activeColor: const Color(0xFFE53935),
+                                      onChanged: _toggleAvailability,
+                                    ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // My Location — powers the free map in Find Donors
+                    _sectionCard(
+                      title: 'My Location',
+                      icon: Icons.my_location_outlined,
+                      children: [
+                        _detailRow(
+                          Icons.pin_drop_outlined,
+                          'Status',
+                          (latitude != null && longitude != null)
+                              ? 'Shared — visible on the donor map'
+                              : 'Not shared yet',
+                        ),
+=======
                         ),
                       ),
                       children: [
@@ -655,6 +789,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               ? 'Shared — visible on the donor map'
                               : 'Not shared yet',
                         ),
+>>>>>>> main
                         const SizedBox(height: 4),
                         SizedBox(
                           width: double.infinity,
@@ -726,6 +861,29 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+<<<<<<< HEAD
+                                  Row(
+                                    children: [
+                                      Text(
+                                        certificateImageUrl.isEmpty
+                                            ? 'No certificate yet'
+                                            : _certificateStatusLabel(),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: certificateImageUrl.isEmpty
+                                              ? Colors.grey
+                                              : _certificateStatusColor(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    certificateStatus == 'rejected'
+                                        ? 'Please upload a clearer certificate.'
+                                        : 'Upload your donor certificate for verification',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+=======
                                   Text(
                                     certificateImageUrl.isNotEmpty
                                         ? 'Certificate uploaded'
@@ -741,6 +899,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                   const Text(
                                     'Upload your donor certificate for verification',
                                     style: TextStyle(fontSize: 12, color: Colors.grey),
+>>>>>>> main
                                   ),
                                   const SizedBox(height: 8),
                                   // Upload button
@@ -821,6 +980,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             case 1:
               Navigator.pushReplacementNamed(context, AppRoutes.emergencyRequest);
               break;
+<<<<<<< HEAD
+            case 2:
+              // BUG FIX: this case was missing, so tapping the notifications
+              // icon on My Profile silently did nothing.
+              Navigator.pushReplacementNamed(context, AppRoutes.notification);
+              break;
+=======
+>>>>>>> main
             case 3:
               Navigator.pushReplacementNamed(context, AppRoutes.myRequest);
               break;
@@ -839,6 +1006,35 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   // ── HELPER WIDGETS ──
 
+<<<<<<< HEAD
+  String _certificateStatusLabel() {
+    switch (certificateStatus) {
+      case 'verified':
+        return 'Verified ✓';
+      case 'rejected':
+        return 'Rejected — re-upload needed';
+      case 'pending':
+        return 'Pending review';
+      default:
+        return 'Certificate uploaded';
+    }
+  }
+
+  Color _certificateStatusColor() {
+    switch (certificateStatus) {
+      case 'verified':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'pending':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+=======
+>>>>>>> main
   Widget _quickInfo(IconData icon, String label, String value) {
     return Column(
       children: [

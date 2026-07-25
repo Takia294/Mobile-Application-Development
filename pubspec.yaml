@@ -1,5 +1,9 @@
 name: lifelink
+<<<<<<< HEAD
+description: LifeLink — Blood & Organ Donation Platform for Bangladesh.
+=======
 description: "LifeLink — Blood & Organ Donation Network"
+>>>>>>> main
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -15,6 +19,32 @@ dependencies:
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.3.4
+<<<<<<< HEAD
+  firebase_messaging: ^15.1.3
+
+  # ── Auth providers ──
+  # NOTE: pinned to the 6.x line on purpose. google_sign_in 7.x replaced
+  # GoogleSignIn().signIn() with a new authenticate()/event-stream API,
+  # which would break AuthService.signInWithGoogle() as written. If you
+  # upgrade to 7.x later, auth_service.dart's Google sign-in flow must
+  # be rewritten to match the new API.
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.3
+  crypto: ^3.0.5
+
+  # ── Location & Maps (free, no API key — OpenStreetMap tiles) ──
+  geolocator: ^13.0.1
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # ── Media & files ──
+  image_picker: ^1.1.2
+
+  # ── UI ──
+  dropdown_search: ^5.0.6
+
+  # ── Utilities ──
+=======
 
   # ── Free map (OpenStreetMap) — no API key required ──
   flutter_map: ^7.0.2
@@ -26,6 +56,7 @@ dependencies:
   # ── UI helpers ──
   dropdown_search: ^5.0.6
   image_picker: ^1.1.2
+>>>>>>> main
   url_launcher: ^6.3.1
   cupertino_icons: ^1.0.8
 
@@ -38,4 +69,8 @@ flutter:
   uses-material-design: true
 
   assets:
+<<<<<<< HEAD
+    - assets/images/
+=======
     - assets/images/logo.png
+>>>>>>> main

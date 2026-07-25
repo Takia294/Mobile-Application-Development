@@ -33,6 +33,23 @@ class NotificationService {
   }
 
   static Future<void> markAsRead(String notificationId) async {
+<<<<<<< HEAD
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    await _ref.doc(notificationId).update({
+      'readBy': FieldValue.arrayUnion([uid]),
+    });
+  }
+
+  static Future<void> markAllAsRead(List<NotificationModel> items) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    final batch = _db.batch();
+    for (final n in items.where((n) => !n.isReadBy(uid))) {
+      batch.update(_ref.doc(n.id), {
+        'readBy': FieldValue.arrayUnion([uid]),
+      });
+=======
     await _ref.doc(notificationId).update({'isRead': true});
   }
 
@@ -40,6 +57,7 @@ class NotificationService {
     final batch = _db.batch();
     for (final n in items.where((n) => !n.isRead)) {
       batch.update(_ref.doc(n.id), {'isRead': true});
+>>>>>>> main
     }
     await batch.commit();
   }

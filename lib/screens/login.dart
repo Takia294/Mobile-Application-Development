@@ -1,8 +1,12 @@
+<<<<<<< HEAD
+=======
 import 'package:cloud_firestore/cloud_firestore.dart';
+>>>>>>> main
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../routes/screen_routes.dart';
+import '../services/auth_service.dart';
 import 'registration.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,14 +43,31 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       setState(() => isLoading = true);
 
+<<<<<<< HEAD
+      // ── Auth + role lookup, routed through AuthService so every
+      // screen agrees on how a role is determined and validated ──
+      final role = await AuthService.loginAndGetRole(
+=======
       // ── Step 1: Firebase Authentication ──
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+>>>>>>> main
         email: email,
         password: password,
       );
 
       if (!mounted) return;
 
+<<<<<<< HEAD
+      if (role == 'admin') {
+        _showMessage('Welcome Admin!', isSuccess: true);
+        Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
+      } else {
+        _showMessage('Login Successful', isSuccess: true);
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      }
+    } on AuthServiceException catch (e) {
+      _showMessage(e.message);
+=======
       // ── Step 2: Firestore থেকে role চেক ──
       final uid = credential.user!.uid;
       final doc = await FirebaseFirestore.instance
@@ -77,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await FirebaseAuth.instance.signOut();
         _showMessage('Access denied. Unknown role.');
       }
+>>>>>>> main
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
@@ -120,6 +142,95 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+<<<<<<< HEAD
+  /// FORGOT PASSWORD — sends a real Firebase password reset email.
+  Future<void> _forgotPassword() async {
+    final controller = TextEditingController(text: emailController.text.trim());
+    final email = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Reset Password'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            hintText: 'Enter your account email',
+            prefixIcon: Icon(Icons.email_outlined),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE53935)),
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Send Link', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (email == null || email.isEmpty) return;
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showMessage('Password reset link sent to $email', isSuccess: true);
+    } on FirebaseAuthException catch (e) {
+      _showMessage(e.code == 'user-not-found'
+          ? 'No account found with this email'
+          : (e.message ?? 'Could not send reset link'));
+    } catch (_) {
+      _showMessage('Could not send reset link');
+    }
+  }
+
+  bool isSocialLoading = false;
+
+  /// GOOGLE SIGN-IN
+  Future<void> _loginWithGoogle() async {
+    setState(() => isSocialLoading = true);
+    try {
+      final role = await AuthService.signInWithGoogle();
+      if (!mounted) return;
+      if (role == 'admin') {
+        Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      }
+    } on AuthServiceException catch (e) {
+      _showMessage(e.message);
+    } catch (e) {
+      _showMessage('Google sign-in failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => isSocialLoading = false);
+    }
+  }
+
+  /// APPLE SIGN-IN
+  Future<void> _loginWithApple() async {
+    setState(() => isSocialLoading = true);
+    try {
+      final role = await AuthService.signInWithApple();
+      if (!mounted) return;
+      if (role == 'admin') {
+        Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      }
+    } on AuthServiceException catch (e) {
+      _showMessage(e.message);
+    } catch (e) {
+      _showMessage('Apple sign-in failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => isSocialLoading = false);
+    }
+  }
+
+=======
+>>>>>>> main
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -230,9 +341,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
+<<<<<<< HEAD
+                      onPressed: _forgotPassword,
+=======
                       onPressed: () {
                         _showMessage('Forgot Password Coming Soon');
                       },
+>>>>>>> main
                       child: const Text(
                         'Forgot Password?',
                         style: TextStyle(color: Color(0xFFE53935)),
@@ -295,7 +410,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   _socialButton(
                     icon: Icons.g_mobiledata,
                     text: 'Continue with Google',
+<<<<<<< HEAD
+                    onTap: isSocialLoading ? null : _loginWithGoogle,
+=======
                     onTap: () => _showMessage('Google Login Coming Soon'),
+>>>>>>> main
                   ),
 
                   const SizedBox(height: 15),
@@ -304,7 +423,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   _socialButton(
                     icon: Icons.apple,
                     text: 'Continue with Apple',
+<<<<<<< HEAD
+                    onTap: isSocialLoading ? null : _loginWithApple,
+=======
                     onTap: () => _showMessage('Apple Login Coming Soon'),
+>>>>>>> main
                   ),
 
                   const SizedBox(height: 35),
@@ -391,7 +514,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _socialButton({
     required IconData icon,
     required String text,
+<<<<<<< HEAD
+    required VoidCallback? onTap,
+=======
     required VoidCallback onTap,
+>>>>>>> main
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -399,14 +526,28 @@ class _LoginScreenState extends State<LoginScreen> {
         height: 52,
         width: double.infinity,
         decoration: BoxDecoration(
+<<<<<<< HEAD
+          color: onTap == null ? Colors.grey.shade100 : Colors.white,
+=======
           color: Colors.white,
+>>>>>>> main
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: Colors.grey.shade300),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+<<<<<<< HEAD
+            if (isSocialLoading)
+              const SizedBox(
+                height: 18, width: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Icon(icon, size: 26),
+=======
             Icon(icon, size: 26),
+>>>>>>> main
             const SizedBox(width: 10),
             Text(
               text,

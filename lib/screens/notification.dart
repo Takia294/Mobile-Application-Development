@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
+import 'package:firebase_auth/firebase_auth.dart';
+=======
+>>>>>>> main
 import '../routes/screen_routes.dart';
 import '../models/notification_model.dart';
 import '../services/notification_service.dart';
@@ -48,6 +52,51 @@ class _NotificationScreenState extends State<NotificationScreen> {
         child: StreamBuilder<List<NotificationModel>>(
           stream: NotificationService.streamMyNotifications(),
           builder: (context, snap) {
+<<<<<<< HEAD
+            if (snap.hasError) {
+              // Show the real error under the generic message — this is what
+              // actually let us catch the missing-composite-index issue
+              // instead of it spinning forever with no clue why.
+              final errorDetail = snap.error.toString();
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 60),
+                    const Icon(Icons.error_outline, size: 56, color: Colors.black26),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Couldn't load notifications",
+                      style: TextStyle(color: Colors.black54, fontSize: 15),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "Check your connection and try again.",
+                      style: TextStyle(color: Colors.black26, fontSize: 12),
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        errorDetail,
+                        textAlign: TextAlign.center,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.black26, fontSize: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => setState(() {}),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+=======
+>>>>>>> main
             final items = snap.data ?? [];
 
             return SingleChildScrollView(
@@ -244,7 +293,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
+<<<<<<< HEAD
+          color: n.isReadBy(FirebaseAuth.instance.currentUser?.uid)
+              ? Colors.white
+              : const Color(0xFFFFF5F5),
+=======
           color: n.isRead ? Colors.white : const Color(0xFFFFF5F5),
+>>>>>>> main
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

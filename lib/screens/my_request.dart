@@ -188,9 +188,15 @@ class _MyRequestScreenState extends State<MyRequestScreen>
         }).toList();
 
         final activeRequests =
+<<<<<<< HEAD
+            resolved.where((r) => r.displayStatus != 'Fulfilled' && r.displayStatus != 'Expired').toList();
+        final completedRequests =
+            resolved.where((r) => r.displayStatus == 'Fulfilled' || r.displayStatus == 'Expired').toList();
+=======
             resolved.where((r) => r.status != 'Fulfilled').toList();
         final completedRequests =
             resolved.where((r) => r.status == 'Fulfilled').toList();
+>>>>>>> main
 
         final list = _activeTab ? activeRequests : completedRequests;
 
@@ -308,7 +314,11 @@ class _MyRequestScreenState extends State<MyRequestScreen>
                             fontSize: 17, fontWeight: FontWeight.bold),
                       ),
                     ),
+<<<<<<< HEAD
+                    _statusBadge(request.displayStatus),
+=======
                     _statusBadge(request.status),
+>>>>>>> main
                   ],
                 ),
 
@@ -407,6 +417,12 @@ class _MyRequestScreenState extends State<MyRequestScreen>
   //  PAST REQUEST CARD
   // ─────────────────────────────────────────────
   Widget _pastRequestCard(RequestModel request) {
+<<<<<<< HEAD
+    final isExpired = request.displayStatus == 'Expired';
+    final tint = isExpired ? Colors.grey : Colors.green;
+
+=======
+>>>>>>> main
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
@@ -425,9 +441,15 @@ class _MyRequestScreenState extends State<MyRequestScreen>
         children: [
           CircleAvatar(
             radius: 26,
+<<<<<<< HEAD
+            backgroundColor: tint.shade50,
+            child: Icon(isExpired ? Icons.schedule : Icons.check_circle,
+                color: tint, size: 26),
+=======
             backgroundColor: Colors.green.shade50,
             child:
                 const Icon(Icons.check_circle, color: Colors.green, size: 26),
+>>>>>>> main
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -455,6 +477,17 @@ class _MyRequestScreenState extends State<MyRequestScreen>
                 const SizedBox(height: 6),
                 Row(
                   children: [
+<<<<<<< HEAD
+                    Icon(isExpired ? Icons.schedule : Icons.check_circle,
+                        color: tint.shade600, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      isExpired
+                          ? 'Expired — no longer active after ${RequestModel.staleAfterDays} days'
+                          : 'Completed',
+                      style: TextStyle(
+                        color: tint.shade600,
+=======
                     Icon(Icons.check_circle,
                         color: Colors.green.shade600, size: 14),
                     const SizedBox(width: 4),
@@ -462,6 +495,7 @@ class _MyRequestScreenState extends State<MyRequestScreen>
                       'Completed',
                       style: TextStyle(
                         color: Colors.green.shade600,
+>>>>>>> main
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -673,6 +707,11 @@ class _MyRequestScreenState extends State<MyRequestScreen>
         return Colors.red;
       case 'fulfilled':
         return Colors.blue;
+<<<<<<< HEAD
+      case 'expired':
+        return Colors.grey;
+=======
+>>>>>>> main
       default:
         return Colors.orange; // Pending
     }

@@ -45,6 +45,45 @@ class RequestDatabase {
   }
 
   // ─────────────────────────────────────────────────────────────
+<<<<<<< HEAD
+  //  SUBMIT COOLDOWN
+  //  Minimum gap required between two requests from the SAME user.
+  //  Prevents one account from spamming the urgent-broadcast alert
+  //  (see NotificationService.sendBroadcast, called from
+  //  EmergencyRequestScreen) to every donor over and over.
+  //  NOTE: this is a client-side deterrent, not a hard security
+  //  boundary — a modified/rooted client could skip this check.
+  //  Real enforcement of "N requests per M minutes" belongs in a
+  //  Cloud Function (App Check + a server-side counter), which is
+  //  out of scope for the Flutter client alone.
+  // ─────────────────────────────────────────────────────────────
+  static const Duration submitCooldown = Duration(minutes: 5);
+
+  /// Throws [RequestCooldownException] if the current user submitted
+  /// a request more recently than [submitCooldown] allows. Called
+  /// automatically by [submitRequest] — screens don't need to call
+  /// this separately, just catch the exception.
+  static Future<void> _assertNotOnCooldown(String uid) async {
+    final recent = await _requestsRef
+        .where('uid', isEqualTo: uid)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (recent.docs.isEmpty) return;
+
+    final lastCreatedAt = recent.docs.first.data()['createdAt'];
+    if (lastCreatedAt is! Timestamp) return;
+
+    final elapsed = DateTime.now().difference(lastCreatedAt.toDate());
+    if (elapsed < submitCooldown) {
+      throw RequestCooldownException(submitCooldown - elapsed);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+=======
+>>>>>>> main
   //  SUBMIT REQUEST
   //  Called by EmergencyRequestScreen when the user taps Submit.
   //  Reads the current user's profile from the `users` collection
@@ -61,6 +100,11 @@ class RequestDatabase {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
+<<<<<<< HEAD
+    await _assertNotOnCooldown(user.uid);
+
+=======
+>>>>>>> main
     // ── Fetch user profile for denormalized fields ──
     String requesterName = '';
     String requesterPhone = '';
@@ -91,6 +135,69 @@ class RequestDatabase {
     );
 
     await _requestsRef.add(model.toMap());
+<<<<<<< HEAD
+
+    // ── Notify matching, available donors ──
+    // Every new request (not just High/Critical) alerts the donors who
+    // could actually fulfill it: donors with a matching donor type who
+    // haven't hidden themselves from search. Non-critical — if this
+    // fails, the request itself is already saved successfully.
+    try {
+      await _notifyMatchingDonors(model);
+    } catch (_) {}
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  //  NOTIFY MATCHING DONORS
+  //  Queries `users` for available donors whose donorType matches the
+  //  request (Blood Donor/Both for a blood request, Organ Donor/Both
+  //  for an organ request), narrows to the exact blood group client-
+  //  side (keeps the Firestore composite index to just isAvailable +
+  //  donorType, reused by both request types), then writes one
+  //  personal notification document per matching donor via a batch.
+  //  The requester themselves is never notified about their own request.
+  // ─────────────────────────────────────────────────────────────
+  static Future<void> _notifyMatchingDonors(RequestModel model) async {
+    final donorTypes = model.requestType == 'Organ Donation'
+        ? const ['Organ Donor', 'Both']
+        : const ['Blood Donor', 'Both'];
+
+    final snap = await _db
+        .collection('users')
+        .where('isAvailable', isEqualTo: true)
+        .where('donorType', whereIn: donorTypes)
+        .get();
+
+    final matchingDocs = snap.docs.where((doc) {
+      if (doc.id == model.uid) return false; // don't notify the requester
+      if (model.requestType == 'Organ Donation') return true;
+      final donorBloodGroup = doc.data()['bloodGroup'] ?? '';
+      return donorBloodGroup == model.bloodGroup;
+    }).toList();
+
+    if (matchingDocs.isEmpty) return;
+
+    final title = model.requestType == 'Organ Donation'
+        ? 'New ${model.organ} request nearby'
+        : 'New ${model.bloodGroup} blood request nearby';
+    final subtitle = '${model.hospital} • ${model.urgency} urgency';
+
+    final batch = _db.batch();
+    final notificationsRef = _db.collection('notifications');
+    for (final doc in matchingDocs) {
+      batch.set(notificationsRef.doc(), {
+        'targetUid': doc.id,
+        'type': 'urgent',
+        'title': title,
+        'subtitle': subtitle,
+        'buttonText': 'Respond Now',
+        'readBy': <String>[],
+        'createdAt': Timestamp.now(),
+      });
+    }
+    await batch.commit();
+=======
+>>>>>>> main
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -120,10 +227,24 @@ class RequestDatabase {
 
   // ─────────────────────────────────────────────────────────────
   //  STREAM ALL REQUESTS  (admin use — all users)
+<<<<<<< HEAD
+  //  [limit] bounds how many requests the Admin Dashboard reads at
+  //  once — without it, a growing `requests` collection would mean
+  //  every admin session re-downloads the entire history on every
+  //  single write, which gets slow and expensive fast. 300 keeps
+  //  the dashboard responsive; older requests are still reachable
+  //  via a dedicated history/search screen if you build one later.
+  // ─────────────────────────────────────────────────────────────
+  static Stream<List<RequestModel>> streamAllRequests({int limit = 300}) {
+    return _requestsRef
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+=======
   // ─────────────────────────────────────────────────────────────
   static Stream<List<RequestModel>> streamAllRequests() {
     return _requestsRef
         .orderBy('createdAt', descending: true)
+>>>>>>> main
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -154,4 +275,27 @@ class RequestDatabase {
     if (requestId.isEmpty) throw Exception('Invalid request ID');
     await _requestsRef.doc(requestId).delete();
   }
+<<<<<<< HEAD
+}
+
+/// Thrown by [RequestDatabase.submitRequest] when the current user is
+/// still within [RequestDatabase.submitCooldown] of their last request.
+/// Screens should catch this specifically to show a friendly
+/// "please wait Xm" message instead of a generic error.
+class RequestCooldownException implements Exception {
+  final Duration remaining;
+  RequestCooldownException(this.remaining);
+
+  String get friendlyMessage {
+    final mins = remaining.inSeconds / 60;
+    if (mins < 1) {
+      return 'Please wait a few seconds before submitting another request.';
+    }
+    return 'Please wait about ${mins.ceil()} minute(s) before submitting another request.';
+  }
+
+  @override
+  String toString() => friendlyMessage;
+=======
+>>>>>>> main
 }

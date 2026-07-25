@@ -26,10 +26,24 @@ class UserModel {
   final String donorType; // 'Blood Donor' | 'Organ Donor' | 'Both' | 'None'
   final String profileImage;
   final String certificateImage;
+<<<<<<< HEAD
+  // 'none' | 'pending' | 'verified' | 'rejected' — set to 'pending' whenever
+  // a donor (re)uploads a certificate; reviewed by an admin.
+  final String certificateStatus;
+  // Whether this donor currently wants to be shown in donor search/map.
+  // Lets a donor temporarily hide themselves (e.g. sick, traveling)
+  // without losing their saved donor type / blood group.
+  final bool isAvailable;
+=======
+>>>>>>> main
   final String role; // 'user' | 'admin'
   final double? latitude;
   final double? longitude;
   final Timestamp? locationUpdatedAt;
+<<<<<<< HEAD
+  final String? fcmToken; // for push notifications (see PushNotificationService)
+=======
+>>>>>>> main
   final Timestamp createdAt;
 
   const UserModel({
@@ -47,10 +61,19 @@ class UserModel {
     this.donorType = 'None',
     this.profileImage = '',
     this.certificateImage = '',
+<<<<<<< HEAD
+    this.certificateStatus = 'none',
+    this.isAvailable = true,
+=======
+>>>>>>> main
     this.role = 'user',
     this.latitude,
     this.longitude,
     this.locationUpdatedAt,
+<<<<<<< HEAD
+    this.fcmToken,
+=======
+>>>>>>> main
     required this.createdAt,
   });
 
@@ -84,12 +107,21 @@ class UserModel {
           : data['donorType'],
       profileImage: data['profileImage'] ?? '',
       certificateImage: data['certificateImage'] ?? '',
+<<<<<<< HEAD
+      certificateStatus: data['certificateStatus'] ?? 'none',
+      isAvailable: data['isAvailable'] ?? true,
+=======
+>>>>>>> main
       role: data['role'] ?? 'user',
       latitude: (data['latitude'] as num?)?.toDouble(),
       longitude: (data['longitude'] as num?)?.toDouble(),
       locationUpdatedAt: data['locationUpdatedAt'] is Timestamp
           ? data['locationUpdatedAt']
           : null,
+<<<<<<< HEAD
+      fcmToken: data['fcmToken'] as String?,
+=======
+>>>>>>> main
       createdAt:
           data['createdAt'] is Timestamp ? data['createdAt'] : Timestamp.now(),
     );
@@ -111,10 +143,19 @@ class UserModel {
       'donorType': donorType,
       'profileImage': profileImage,
       'certificateImage': certificateImage,
+<<<<<<< HEAD
+      'certificateStatus': certificateStatus,
+      'isAvailable': isAvailable,
+=======
+>>>>>>> main
       'role': role,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       if (locationUpdatedAt != null) 'locationUpdatedAt': locationUpdatedAt,
+<<<<<<< HEAD
+      if (fcmToken != null) 'fcmToken': fcmToken,
+=======
+>>>>>>> main
       'createdAt': createdAt,
     };
   }

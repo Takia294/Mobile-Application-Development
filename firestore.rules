@@ -2,11 +2,26 @@ rules_version = '2';
 
 // ============================================================
 // LifeLink — Firestore Security Rules
+<<<<<<< HEAD
+//
+// Collections used by the app:
+//   users           - one doc per account (profile, donor info, role)
+//   requests        - blood/organ donation requests
+//   notifications   - personal + broadcast alerts
+//   admin_stats     - single "summary" doc with live counters
+//
+// Deploy with:  firebase deploy --only firestore:rules
+=======
 // Deploy with: firebase deploy --only firestore:rules
+>>>>>>> main
 // ============================================================
 service cloud.firestore {
   match /databases/{database}/documents {
 
+<<<<<<< HEAD
+    // ── Helpers ──────────────────────────────────────────────
+=======
+>>>>>>> main
     function isSignedIn() {
       return request.auth != null;
     }
@@ -15,11 +30,116 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+<<<<<<< HEAD
+    // Reads the requester's OWN role from their user doc. Never trust a
+    // role value sent in the request itself — always re-read from the
+    // already-stored, admin-controlled document.
+=======
+>>>>>>> main
     function isAdmin() {
       return isSignedIn() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+<<<<<<< HEAD
+    function onlyFieldsChanged(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ── users/{uid} ──────────────────────────────────────────
+    // Read: any signed-in user (needed for donor search/map and for the
+    //   admin dashboard's live user list). No public/unauthenticated read.
+    // Create: only the user themselves, and only as a normal 'user' — no
+    //   self-promotion to admin on signup.
+    // Update: the owner can edit their own profile fields, but:
+    //   - cannot change their own `role`
+    //   - cannot self-approve a donor certificate (certificateStatus can
+    //     only be set to 'pending' or 'none' by the owner; 'verified' /
+    //     'rejected' is admin-only)
+    // Admin: full read/write/delete (donor certificate review, account
+    //   management).
+    // Delete: admin only (regular users don't self-delete from the app).
+    match /users/{uid} {
+      allow read: if isSignedIn();
+
+      allow create: if isOwner(uid) &&
+        request.resource.data.uid == uid &&
+        request.resource.data.role == 'user';
+
+      allow update: if isAdmin() || (
+        isOwner(uid) &&
+        request.resource.data.role == resource.data.role &&
+        (request.resource.data.certificateStatus == resource.data.certificateStatus ||
+         request.resource.data.certificateStatus in ['pending', 'none'])
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ── requests/{requestId} ─────────────────────────────────
+    // Create: only signed-in users, only for themselves, must start
+    //   'Active'.
+    // Read: the requester can read their own; admin can read all
+    //   (Admin Dashboard's live request table).
+    // Update: the owner may only flip status forward to 'Fulfilled'
+    //   (My Requests screen); admin may set any status.
+    // Delete: admin only.
+    match /requests/{requestId} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'Active';
+
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        resource.data.uid == request.auth.uid &&
+        onlyFieldsChanged(['status']) &&
+        request.resource.data.status == 'Fulfilled'
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ── notifications/{notificationId} ───────────────────────
+    // Read: only the targeted user, or anyone if it's a broadcast
+    //   ('all').
+    // Create: any signed-in user may create one — the app itself
+    //   triggers broadcasts client-side (e.g. a High/Critical emergency
+    //   request) and personal ones (e.g. "your request was fulfilled",
+    //   certificate review). Shape is validated below.
+    // Update: only to mark as read — callers may only ever add their
+    //   own uid to `readBy`, nothing else may change.
+    // Delete: admin only.
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() &&
+        (resource.data.targetUid == request.auth.uid || resource.data.targetUid == 'all');
+
+      allow create: if isSignedIn() &&
+        request.resource.data.type in ['urgent', 'fulfilled', 'info', 'event'] &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0;
+
+      allow update: if isSignedIn() &&
+        onlyFieldsChanged(['readBy']) &&
+        request.resource.data.readBy.hasAll(resource.data.readBy) &&
+        request.resource.data.readBy.removeAll(resource.data.readBy).hasOnly([request.auth.uid]);
+
+      allow delete: if isAdmin();
+    }
+
+    // ── admin_stats/{docId} ───────────────────────────────────
+    // A single live counters doc ("summary"). Any signed-in user may
+    // bump it (a regular user marking their own request Fulfilled
+    // increments Today's Donations), but only admins may read the raw
+    // doc directly outside the app's own increment call... in practice
+    // the dashboard needs read access too, so this stays broad but
+    // signed-in-only. No deletes from the client.
+    match /admin_stats/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+      allow delete: if false;
+=======
     // ── USERS ──
     // Anyone signed in can read profiles (needed for donor search).
     // Only the owner (or an admin) can create/update/delete their doc.
@@ -68,6 +188,7 @@ service cloud.firestore {
     match /complaints/{docId} {
       allow read: if isAdmin();
       allow write: if isSignedIn();
+>>>>>>> main
     }
   }
 }

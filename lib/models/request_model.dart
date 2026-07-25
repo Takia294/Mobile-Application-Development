@@ -9,8 +9,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// `status` is what the Admin Dashboard's "Active Request" stat
 /// card counts — any request saved with status = 'Active' will
 /// immediately be included in that live count.
+<<<<<<< HEAD
+///
+/// EXPIRY: requests older than [staleAfterDays] that are still
+/// unfulfilled are treated as 'Expired' via [displayStatus] — a
+/// purely client-computed value, so old requests correctly drop
+/// out of "Active" everywhere (My Requests, Admin Dashboard stats)
+/// without needing a scheduled Cloud Function. An admin can still
+/// persist this permanently by picking "Expired" from the status
+/// picker on the Admin Dashboard.
 /// ============================================================
 class RequestModel {
+  static const int staleAfterDays = 7;
+
+=======
+/// ============================================================
+class RequestModel {
+>>>>>>> main
   final String id; // Firestore document id (empty until saved)
   final String uid; // uid of the user who created the request
   final String requestType; // 'Blood Donation' | 'Organ Donation'
@@ -19,7 +34,11 @@ class RequestModel {
   final String hospital; // selected hospital name
   final String address; // free text address
   final String urgency; // 'Low' | 'Medium' | 'High' | 'Critical'
+<<<<<<< HEAD
+  final String status; // 'Active' | 'Pending' | 'Critical' | 'Fulfilled' | 'Expired'
+=======
   final String status; // 'Active' | 'Pending' | 'Critical' | 'Fulfilled'
+>>>>>>> main
   final String requesterName; // full name (denormalized for fast admin display)
   final String requesterPhone; // phone (denormalized for fast admin display)
   final Timestamp createdAt;
@@ -39,6 +58,21 @@ class RequestModel {
     this.status = 'Active',
   });
 
+<<<<<<< HEAD
+  /// Whether this request is unfulfilled and older than [staleAfterDays].
+  bool get isStale {
+    if (status == 'Fulfilled' || status == 'Expired') return false;
+    final ageDays = DateTime.now().difference(createdAt.toDate()).inDays;
+    return ageDays >= staleAfterDays;
+  }
+
+  /// The status to actually show in the UI — same as [status] unless the
+  /// request has gone stale, in which case it reads as 'Expired' even
+  /// though the stored Firestore value hasn't been changed.
+  String get displayStatus => isStale ? 'Expired' : status;
+
+=======
+>>>>>>> main
   /// ── Convert this model into a Map ready to be written to Firestore ──
   Map<String, dynamic> toMap() {
     return {

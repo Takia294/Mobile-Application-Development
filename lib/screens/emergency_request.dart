@@ -20,6 +20,13 @@ import 'find_donor.dart';
 import 'my_request.dart';
 import 'myprofile.dart';
 
+import '../services/hospital_service.dart';
+import '../services/request_database.dart' show RequestDatabase, RequestCooldownException;
+import 'dashboard.dart';
+import 'find_donor.dart';
+import 'my_request.dart';
+import 'myprofile.dart';
+
 class EmergencyRequestScreen extends StatefulWidget {
   const EmergencyRequestScreen({super.key});
 
@@ -98,7 +105,13 @@ class _EmergencyRequestScreenState
     setState(() => isSubmitting = true);
 
     try {
+<<<<<<< HEAD
+      /// SAVE TO FIRESTORE via RequestDatabase — this now also alerts
+      /// every available, matching donor automatically (see
+      /// RequestDatabase._notifyMatchingDonors), regardless of urgency.
+=======
       /// SAVE TO FIRESTORE via RequestDatabase
+>>>>>>> main
       await RequestDatabase.submitRequest(
         requestType: requestType,
         bloodGroup: selectedBloodGroup,
@@ -127,6 +140,11 @@ class _EmergencyRequestScreenState
         selectedHospital = 'None';
         selectedUrgency = 'Medium';
       });
+<<<<<<< HEAD
+    } on RequestCooldownException catch (e) {
+      _showMessage(e.friendlyMessage);
+=======
+>>>>>>> main
     } catch (e) {
       _showMessage('Failed to submit request: ${e.toString()}');
     } finally {

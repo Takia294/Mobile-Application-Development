@@ -16,6 +16,10 @@ class DonorModel {
   final String city;
   final String phone;
   final String profileImage;
+<<<<<<< HEAD
+  final bool isAvailable;
+=======
+>>>>>>> main
   final double? latitude;
   final double? longitude;
   double? distanceKm;
@@ -29,6 +33,10 @@ class DonorModel {
     required this.city,
     required this.phone,
     required this.profileImage,
+<<<<<<< HEAD
+    this.isAvailable = true,
+=======
+>>>>>>> main
     this.latitude,
     this.longitude,
     this.distanceKm,
@@ -50,6 +58,10 @@ class DonorModel {
       city: data['city'] ?? '',
       phone: data['phone'] ?? '',
       profileImage: data['profileImage'] ?? '',
+<<<<<<< HEAD
+      isAvailable: data['isAvailable'] ?? true,
+=======
+>>>>>>> main
       latitude: (data['latitude'] as num?)?.toDouble(),
       longitude: (data['longitude'] as num?)?.toDouble(),
     );

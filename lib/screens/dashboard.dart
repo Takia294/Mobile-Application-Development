@@ -9,6 +9,10 @@ import '../routes/screen_routes.dart';
 import '../models/hospital_model.dart';
 import '../services/hospital_service.dart';
 import '../services/location_service.dart';
+<<<<<<< HEAD
+import '../services/push_notification_service.dart';
+=======
+>>>>>>> main
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -56,6 +60,10 @@ class _DashboardScreenState
 
     loadUserName();
     _loadLocation();
+<<<<<<< HEAD
+    PushNotificationService.init();
+=======
+>>>>>>> main
 
     /// AUTO GREETING UPDATE
     _timer = Timer.periodic(
@@ -556,7 +564,10 @@ class _DashboardScreenState
                           title:
                               'Book Request',
                           onTap: () {
+<<<<<<< HEAD
+=======
 
+>>>>>>> main
                             Navigator.pushNamed(
                               context,
                               AppRoutes

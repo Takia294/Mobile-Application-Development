@@ -1,5 +1,16 @@
+<<<<<<< HEAD
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+=======
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+>>>>>>> main
 
 import '../models/user_model.dart';
 
@@ -91,6 +102,120 @@ class AuthService {
 
   static Future<void> logout() async => _auth.signOut();
 
+<<<<<<< HEAD
+  /// ── GOOGLE SIGN-IN ──
+  /// Returns the signed-in user's role, creating a Firestore profile
+  /// on first sign-in (same document shape as email/password
+  /// registration, just without a phone/address/DOB yet — the user
+  /// can fill those in later from My Profile).
+  static Future<String> signInWithGoogle() async {
+    final googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw AuthServiceException('Google sign-in was cancelled.');
+    }
+
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential = await _auth.signInWithCredential(credential);
+    final user = userCredential.user!;
+
+    return _ensureUserDocAndGetRole(
+      uid: user.uid,
+      email: user.email ?? googleUser.email,
+      fallbackName: user.displayName ?? googleUser.displayName ?? '',
+    );
+  }
+
+  /// ── APPLE SIGN-IN ──
+  /// Uses a hashed nonce (Apple's recommended flow) to prevent replay
+  /// attacks. Apple only shares the user's name on their very first
+  /// sign-in ever, so [fallbackName] may be empty on repeat sign-ins —
+  /// that's expected and fine, the Firestore doc already has the name
+  /// saved from the first time.
+  static Future<String> signInWithApple() async {
+    final rawNonce = _generateNonce();
+    final hashedNonce = _sha256(rawNonce);
+
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
+    );
+
+    final oauthCredential = OAuthProvider('apple.com').credential(
+      idToken: appleCredential.identityToken,
+      rawNonce: rawNonce,
+    );
+
+    final userCredential = await _auth.signInWithCredential(oauthCredential);
+    final user = userCredential.user!;
+
+    final fallbackName = [
+      appleCredential.givenName,
+      appleCredential.familyName,
+    ].where((s) => s != null && s.trim().isNotEmpty).join(' ');
+
+    return _ensureUserDocAndGetRole(
+      uid: user.uid,
+      email: user.email ?? appleCredential.email ?? '',
+      fallbackName: fallbackName,
+    );
+  }
+
+  /// Creates a minimal `users` doc on first social sign-in (matching
+  /// the same shape/defaults as [register]), or just reads the role
+  /// back if the doc already exists. Shared by Google + Apple.
+  static Future<String> _ensureUserDocAndGetRole({
+    required String uid,
+    required String email,
+    required String fallbackName,
+  }) async {
+    final docRef = _db.collection('users').doc(uid);
+    final doc = await docRef.get();
+
+    if (!doc.exists) {
+      final user = UserModel(
+        uid: uid,
+        fullName: fallbackName,
+        email: email,
+        phone: '',
+        bloodGroup: '',
+        donorType: 'None',
+        role: 'user',
+        createdAt: Timestamp.now(),
+      );
+      await docRef.set(user.toMap());
+      return 'user';
+    }
+
+    final role = doc.data()?['role'] ?? '';
+    if (role != 'admin' && role != 'user') {
+      await _auth.signOut();
+      throw AuthServiceException('Access denied. Unknown role.');
+    }
+    return role;
+  }
+
+  static String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  static String _sha256(String input) {
+    return sha256.convert(utf8.encode(input)).toString();
+  }
+
+=======
+>>>>>>> main
   static Future<UserModel?> getCurrentUserProfile() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
