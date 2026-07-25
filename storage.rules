@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// ============================================================
+// LifeLink — Firebase Storage Security Rules
+//
+// Layout written by StorageService / MyProfileScreen:
+//   profiles/{uid}/profile.jpg
+//   profiles/{uid}/certificate.jpg
+// ============================================================
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /profiles/{uid}/{fileName} {
+      // Anyone signed in can VIEW profile photos and certificates (donor
+      // cards/search show profile photos; admins review certificates).
+      allow read: if request.auth != null;
+
+      // Only the account owner can upload their own files, capped at
+      // 5 MB, images only.
+      allow write: if request.auth != null &&
+        request.auth.uid == uid &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
