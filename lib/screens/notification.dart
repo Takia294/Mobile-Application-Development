@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:firebase_auth/firebase_auth.dart';
+=======
+>>>>>>> main
 import '../routes/screen_routes.dart';
 import '../models/notification_model.dart';
 import '../services/notification_service.dart';
@@ -49,6 +52,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         child: StreamBuilder<List<NotificationModel>>(
           stream: NotificationService.streamMyNotifications(),
           builder: (context, snap) {
+<<<<<<< HEAD
             if (snap.hasError) {
               // Show the real error under the generic message — this is what
               // actually let us catch the missing-composite-index issue
@@ -91,6 +95,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
               );
             }
 
+=======
+>>>>>>> main
             final items = snap.data ?? [];
 
             return SingleChildScrollView(
@@ -287,9 +293,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
+<<<<<<< HEAD
           color: n.isReadBy(FirebaseAuth.instance.currentUser?.uid)
               ? Colors.white
               : const Color(0xFFFFF5F5),
+=======
+          color: n.isRead ? Colors.white : const Color(0xFFFFF5F5),
+>>>>>>> main
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

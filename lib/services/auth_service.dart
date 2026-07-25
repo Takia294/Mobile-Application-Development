@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import 'dart:convert';
 import 'dart:math';
 
@@ -6,6 +7,10 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+=======
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+>>>>>>> main
 
 import '../models/user_model.dart';
 
@@ -97,6 +102,7 @@ class AuthService {
 
   static Future<void> logout() async => _auth.signOut();
 
+<<<<<<< HEAD
   /// ── GOOGLE SIGN-IN ──
   /// Returns the signed-in user's role, creating a Firestore profile
   /// on first sign-in (same document shape as email/password
@@ -208,6 +214,8 @@ class AuthService {
     return sha256.convert(utf8.encode(input)).toString();
   }
 
+=======
+>>>>>>> main
   static Future<UserModel?> getCurrentUserProfile() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+<<<<<<< HEAD
 import 'package:firebase_messaging/firebase_messaging.dart';
+=======
+>>>>>>> main
 
 import 'firebase_options.dart';
 import 'routes/screen_routes.dart';
 
+<<<<<<< HEAD
 /// Must be a top-level (or static) function — this runs in its own
 /// isolate when a push notification arrives while the app is fully
 /// closed or backgrounded. We don't need to do anything with the
@@ -15,6 +19,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
+=======
+>>>>>>> main
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,8 +29,11 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
+<<<<<<< HEAD
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+=======
+>>>>>>> main
     debugPrint(
       'Firebase Initialized Successfully',
     );

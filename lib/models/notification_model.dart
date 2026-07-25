@@ -7,11 +7,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// directly (personal, e.g. "your request was fulfilled") or
 /// broadcast to all users (targetUid == 'all', e.g. urgent
 /// blood requests, donor meetups).
+<<<<<<< HEAD
 ///
 /// BUG FIX: broadcast notifications used to share a single global
 /// `isRead` flag, so one user tapping "mark as read" silently
 /// marked it read for every other user too. `readBy` now tracks
 /// read state per-user (see NotificationModel.isReadBy).
+=======
+>>>>>>> main
 /// ============================================================
 class NotificationModel {
   final String id;
@@ -20,7 +23,11 @@ class NotificationModel {
   final String title;
   final String subtitle;
   final String buttonText;
+<<<<<<< HEAD
   final List<String> readBy;
+=======
+  final bool isRead;
+>>>>>>> main
   final Timestamp createdAt;
 
   const NotificationModel({
@@ -30,6 +37,7 @@ class NotificationModel {
     required this.title,
     this.subtitle = '',
     this.buttonText = '',
+<<<<<<< HEAD
     this.readBy = const [],
     required this.createdAt,
   });
@@ -37,6 +45,12 @@ class NotificationModel {
   /// Whether [uid] has already read this notification.
   bool isReadBy(String? uid) => uid != null && readBy.contains(uid);
 
+=======
+    this.isRead = false,
+    required this.createdAt,
+  });
+
+>>>>>>> main
   factory NotificationModel.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return NotificationModel(
@@ -46,7 +60,11 @@ class NotificationModel {
       title: data['title'] ?? '',
       subtitle: data['subtitle'] ?? '',
       buttonText: data['buttonText'] ?? '',
+<<<<<<< HEAD
       readBy: List<String>.from(data['readBy'] ?? const []),
+=======
+      isRead: data['isRead'] ?? false,
+>>>>>>> main
       createdAt:
           data['createdAt'] is Timestamp ? data['createdAt'] : Timestamp.now(),
     );
@@ -59,7 +77,11 @@ class NotificationModel {
       'title': title,
       'subtitle': subtitle,
       'buttonText': buttonText,
+<<<<<<< HEAD
       'readBy': readBy,
+=======
+      'isRead': isRead,
+>>>>>>> main
       'createdAt': createdAt,
     };
   }

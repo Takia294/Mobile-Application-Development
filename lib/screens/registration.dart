@@ -1,8 +1,15 @@
+<<<<<<< HEAD
+=======
+import 'package:cloud_firestore/cloud_firestore.dart';
+>>>>>>> main
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../routes/screen_routes.dart';
+<<<<<<< HEAD
 import '../services/auth_service.dart';
+=======
+>>>>>>> main
 import '../services/location_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -61,6 +68,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if (picked != null && mounted) {
       setState(() {
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
         selectedDate = picked;
       });
     }
@@ -71,6 +82,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     try {
       setState(() => isLoading = true);
 
+<<<<<<< HEAD
+=======
+      /// CREATE USER IN FIREBASE AUTH
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      /// USER ID
+      String uid = userCredential.user!.uid;
+
+>>>>>>> main
       /// TRY TO GET GPS LOCATION (non-blocking — registration still
       /// succeeds even if the user denies permission or GPS is off).
       /// This is what lets the free map in Find Donors show this
@@ -87,6 +111,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         }
       }
 
+<<<<<<< HEAD
       /// CREATE AUTH USER + FIRESTORE PROFILE — routed through AuthService
       /// so this stays the single place that defines the `users` document
       /// shape (donorType 'None', role 'user', etc.), matching what
@@ -107,6 +132,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         latitude: latitude,
         longitude: longitude,
       );
+=======
+      /// SAVE USER DATA IN FIRESTORE
+      /// role: 'user' by default
+      /// donorType uses the canonical value 'None' — the same value
+      /// FindDonorScreen/DonorService checks against, so filters stay
+      /// consistent app-wide.
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        "uid": uid,
+        "fullName": fullNameController.text.trim(),
+        "email": emailController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "house": houseController.text.trim(),
+        "road": roadController.text.trim(),
+        "area": areaController.text.trim(),
+        "city": cityController.text.trim(),
+        "gender": gender ?? "",
+        "dob": selectedDate != null
+            ? "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"
+            : "",
+        "bloodGroup": "",
+        "donorType": "None",
+        "profileImage": "",
+        "certificateImage": "",
+        "role": "user", // ← login এ role check করার জন্য
+        if (latitude != null) "latitude": latitude,
+        if (longitude != null) "longitude": longitude,
+        if (latitude != null) "locationUpdatedAt": Timestamp.now(),
+        "createdAt": Timestamp.now(),
+      });
+>>>>>>> main
 
       if (!mounted) return;
 
@@ -490,6 +545,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     bool isEmail = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
+
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -545,7 +601,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     required VoidCallback toggle,
     bool isConfirmPassword = false,
   }) {
+
     return TextFormField(
+
       controller: controller,
       obscureText: obscure,
       textInputAction: TextInputAction.done,

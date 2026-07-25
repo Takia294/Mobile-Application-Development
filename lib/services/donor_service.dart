@@ -44,7 +44,11 @@ class DonorService {
       final myUid = FirebaseAuth.instance.currentUser?.uid;
       return snap.docs
           .map((d) => DonorModel.fromDoc(d))
+<<<<<<< HEAD
           .where((donor) => donor.uid != myUid && donor.isAvailable)
+=======
+          .where((donor) => donor.uid != myUid)
+>>>>>>> main
           .toList();
     });
   }

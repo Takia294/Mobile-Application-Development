@@ -8,7 +8,10 @@ import 'package:image_picker/image_picker.dart';
 
 import '../routes/screen_routes.dart';
 import '../services/location_service.dart';
+<<<<<<< HEAD
 import '../services/push_notification_service.dart';
+=======
+>>>>>>> main
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -43,9 +46,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   String dob = '';
   String profileImageUrl = '';
   String certificateImageUrl = '';
+<<<<<<< HEAD
   String certificateStatus = 'none'; // 'none' | 'pending' | 'verified' | 'rejected'
   bool isAvailable = true;
   bool isTogglingAvailability = false;
+=======
+>>>>>>> main
   double? latitude;
   double? longitude;
   bool isUpdatingLocation = false;
@@ -81,8 +87,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           dob = data['dob'] ?? '';
           profileImageUrl = data['profileImage'] ?? '';
           certificateImageUrl = data['certificateImage'] ?? '';
+<<<<<<< HEAD
           certificateStatus = data['certificateStatus'] ?? 'none';
           isAvailable = data['isAvailable'] ?? true;
+=======
+>>>>>>> main
           latitude = (data['latitude'] as num?)?.toDouble();
           longitude = (data['longitude'] as num?)?.toDouble();
         });
@@ -113,10 +122,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     setState(() => isUploadingProfile = true);
 
     final uid = _auth.currentUser?.uid;
+<<<<<<< HEAD
     if (uid == null) {
       if (mounted) setState(() => isUploadingProfile = false);
       return;
     }
+=======
+    if (uid == null) return;
+>>>>>>> main
 
     final url = await _uploadImageToStorage(image, 'profiles/$uid/profile.jpg');
 
@@ -139,14 +152,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     setState(() => isUploadingCertificate = true);
 
     final uid = _auth.currentUser?.uid;
+<<<<<<< HEAD
     if (uid == null) {
       if (mounted) setState(() => isUploadingCertificate = false);
       return;
     }
+=======
+    if (uid == null) return;
+>>>>>>> main
 
     final url = await _uploadImageToStorage(image, 'profiles/$uid/certificate.jpg');
 
     if (url != null) {
+<<<<<<< HEAD
       await _firestore.collection('users').doc(uid).update({
         'certificateImage': url,
         'certificateStatus': 'pending',
@@ -158,6 +176,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         });
       }
       _showSnackBar('Certificate uploaded! Pending admin verification.', isSuccess: true);
+=======
+      await _firestore.collection('users').doc(uid).update({'certificateImage': url});
+      if (mounted) setState(() => certificateImageUrl = url);
+      _showSnackBar('Certificate uploaded!', isSuccess: true);
+>>>>>>> main
     } else {
       _showSnackBar('Failed to upload certificate');
     }
@@ -352,7 +375,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
 
     if (confirm == true) {
+<<<<<<< HEAD
       await PushNotificationService.clearTokenOnLogout();
+=======
+>>>>>>> main
       await _auth.signOut();
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, AppRoutes.login);
@@ -372,6 +398,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
+<<<<<<< HEAD
   // ── TOGGLE DONOR AVAILABILITY ──
   // Lets a donor temporarily hide from FindDonorScreen search/map
   // (e.g. sick, traveling, already donated recently) without losing
@@ -395,6 +422,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     }
   }
 
+=======
+>>>>>>> main
   // ── SHARE / UPDATE MY LOCATION ──
   // Saves the donor's current GPS coordinates so FindDonorScreen's
   // map can plot them and sort search results by real distance.
@@ -675,6 +704,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
+<<<<<<< HEAD
                         ),
                       ),
                       children: [
@@ -734,6 +764,32 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               ? 'Shared — visible on the donor map'
                               : 'Not shared yet',
                         ),
+=======
+                        ),
+                      ),
+                      children: [
+                        _detailRow(Icons.bloodtype_outlined, 'Blood Group',
+                            bloodGroup.isNotEmpty ? bloodGroup : 'Not set'),
+                        _detailRow(Icons.volunteer_activism_outlined, 'Donor Type',
+                            donorType.isNotEmpty ? donorType : 'Not set'),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // My Location — powers the free map in Find Donors
+                    _sectionCard(
+                      title: 'My Location',
+                      icon: Icons.my_location_outlined,
+                      children: [
+                        _detailRow(
+                          Icons.pin_drop_outlined,
+                          'Status',
+                          (latitude != null && longitude != null)
+                              ? 'Shared — visible on the donor map'
+                              : 'Not shared yet',
+                        ),
+>>>>>>> main
                         const SizedBox(height: 4),
                         SizedBox(
                           width: double.infinity,
@@ -805,6 +861,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+<<<<<<< HEAD
                                   Row(
                                     children: [
                                       Text(
@@ -826,6 +883,23 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                         ? 'Please upload a clearer certificate.'
                                         : 'Upload your donor certificate for verification',
                                     style: const TextStyle(fontSize: 12, color: Colors.grey),
+=======
+                                  Text(
+                                    certificateImageUrl.isNotEmpty
+                                        ? 'Certificate uploaded'
+                                        : 'No certificate yet',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: certificateImageUrl.isNotEmpty
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Upload your donor certificate for verification',
+                                    style: TextStyle(fontSize: 12, color: Colors.grey),
+>>>>>>> main
                                   ),
                                   const SizedBox(height: 8),
                                   // Upload button
@@ -906,11 +980,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             case 1:
               Navigator.pushReplacementNamed(context, AppRoutes.emergencyRequest);
               break;
+<<<<<<< HEAD
             case 2:
               // BUG FIX: this case was missing, so tapping the notifications
               // icon on My Profile silently did nothing.
               Navigator.pushReplacementNamed(context, AppRoutes.notification);
               break;
+=======
+>>>>>>> main
             case 3:
               Navigator.pushReplacementNamed(context, AppRoutes.myRequest);
               break;
@@ -929,6 +1006,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   // ── HELPER WIDGETS ──
 
+<<<<<<< HEAD
   String _certificateStatusLabel() {
     switch (certificateStatus) {
       case 'verified':
@@ -955,6 +1033,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     }
   }
 
+=======
+>>>>>>> main
   Widget _quickInfo(IconData icon, String label, String value) {
     return Column(
       children: [

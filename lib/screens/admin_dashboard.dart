@@ -3,8 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/request_model.dart';
+<<<<<<< HEAD
 import '../services/notification_service.dart';
 import '../services/push_notification_service.dart';
+=======
+>>>>>>> main
 import '../services/request_database.dart';
 import '../routes/screen_routes.dart';
 
@@ -21,6 +24,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ── Live snapshot caches ──
   List<QueryDocumentSnapshot> _users = [];
   List<RequestModel> _requests = [];
+<<<<<<< HEAD
   int _todayDonationsLive = 0;
 
   // ── Stream error state ──
@@ -38,6 +42,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // collections grow into the thousands.
   static const int _usersLimit = 500;
 
+=======
+  List<QueryDocumentSnapshot> _donations = [];
+  List<QueryDocumentSnapshot> _complaints = [];
+  int _todayDonationsLive = 0;
+
+  // ── Subscriptions ──
+  final List<StreamSubscription> _subs = [];
+
+>>>>>>> main
   // ── Search ──
   final _searchCtrl = TextEditingController();
   String _searchQuery = '';
@@ -50,7 +63,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void initState() {
     super.initState();
     _subscribeAll();
+<<<<<<< HEAD
     PushNotificationService.init();
+=======
+>>>>>>> main
     // Rebuild every second so "last updated X seconds ago" stays live
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
@@ -58,6 +74,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   void _subscribeAll() {
+<<<<<<< HEAD
     _subs.add(_db
         .collection('users')
         .orderBy('createdAt', descending: true)
@@ -73,10 +90,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         if (mounted) setState(() => _streamError = 'Users list: ${e.toString()}');
       },
     ));
+=======
+    _subs.add(_db.collection('users').snapshots().listen((s) {
+      if (mounted) setState(() { _users = s.docs; _lastRefresh = DateTime.now(); });
+    }));
+>>>>>>> main
 
     // ── Requests: go through RequestDatabase so this screen and the
     // ── user app (MyRequestScreen / EmergencyRequestScreen) always
     // ── agree on shape + status values (Active/Pending/Critical/Fulfilled).
+<<<<<<< HEAD
     _subs.add(RequestDatabase.streamAllRequests().listen(
       (reqs) {
         if (mounted) {
@@ -87,6 +110,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         if (mounted) setState(() => _streamError = 'Requests: ${e.toString()}');
       },
     ));
+=======
+    _subs.add(RequestDatabase.streamAllRequests().listen((reqs) {
+      if (mounted) setState(() { _requests = reqs; _lastRefresh = DateTime.now(); });
+    }));
+
+    _subs.add(_db.collection('donations').snapshots().listen((s) {
+      if (mounted) setState(() { _donations = s.docs; _lastRefresh = DateTime.now(); });
+    }));
+    _subs.add(_db.collection('complaints').snapshots().listen((s) {
+      if (mounted) setState(() { _complaints = s.docs; _lastRefresh = DateTime.now(); });
+    }));
+>>>>>>> main
 
     // ── Today's Donations: this is the SAME counter that
     // ── RequestDatabase.incrementTodaysDonations() bumps when a user
@@ -94,6 +129,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     // ── RequestDatabase.streamTodaysDonationCount() keeps both screens
     // ── pointed at the exact same Firestore document, so the stat card
     // ── updates live the moment a request is completed.
+<<<<<<< HEAD
     _subs.add(RequestDatabase.streamTodaysDonationCount().listen(
       (count) {
         if (mounted) {
@@ -104,6 +140,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         if (mounted) setState(() => _streamError = 'Donation count: ${e.toString()}');
       },
     ));
+=======
+    _subs.add(RequestDatabase.streamTodaysDonationCount().listen((count) {
+      if (mounted) setState(() { _todayDonationsLive = count; _lastRefresh = DateTime.now(); });
+    }));
+>>>>>>> main
   }
 
   @override
@@ -119,6 +160,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ────────────────────────────────────────────
   int get _totalUsers => _users.length;
   int get _activeRequests =>
+<<<<<<< HEAD
       _requests.where((r) => r.displayStatus == 'Active').length;
 
   // BUG FIX: this used to read a `complaints` collection that nothing in
@@ -127,6 +169,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // need to act on urgently.
   int get _criticalRequests =>
       _requests.where((r) => r.displayStatus == 'Critical' || (r.urgency == 'Critical' && !r.isStale)).length;
+=======
+      _requests.where((r) => r.status == 'Active').length;
+  int get _pendingComplaints =>
+      _complaints.where((c) => (c['status'] ?? '') == 'Pending').length;
+>>>>>>> main
 
   // Today's donations now comes live from RequestDatabase (see _subscribeAll),
   // fed by RequestDatabase.incrementTodaysDonations() whenever a user marks
@@ -140,6 +187,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return '${diff}s ago';
   }
 
+<<<<<<< HEAD
   // BUG FIX: QueryDocumentSnapshot's `[]` operator throws a StateError if
   // the field doesn't exist on that document at all — unlike a normal
   // Dart Map, which just returns null. Any user document created before
@@ -157,10 +205,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return _users.where((u) {
       final name = (_field(u, 'fullName') ?? '').toString().toLowerCase();
       final email = (_field(u, 'email') ?? '').toString().toLowerCase();
+=======
+  List<QueryDocumentSnapshot> get _filteredUsers {
+    if (_searchQuery.isEmpty) return _users;
+    return _users.where((u) {
+      final name = (u['fullName'] ?? '').toString().toLowerCase();
+      final email = (u['email'] ?? '').toString().toLowerCase();
+>>>>>>> main
       return name.contains(_searchQuery) || email.contains(_searchQuery);
     }).toList();
   }
 
+<<<<<<< HEAD
   List<QueryDocumentSnapshot> get _pendingCertificates =>
       _users.where((u) => (_field(u, 'certificateStatus') ?? '') == 'pending').toList();
 
@@ -177,6 +233,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       final date = r.createdAt.toDate();
       if (date.year != thisYear) continue;
       map[date.month] = (map[date.month] ?? 0) + 1;
+=======
+  Map<int, int> get _monthlyDonations {
+    final map = <int, int>{for (int i = 1; i <= 12; i++) i: 0};
+    for (final d in _donations) {
+      final ts = (d.data() as Map)['createdAt'];
+      if (ts is Timestamp) {
+        final m = ts.toDate().month;
+        map[m] = (map[m] ?? 0) + 1;
+      }
+>>>>>>> main
     }
     return map;
   }
@@ -187,7 +253,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _logout() async {
     final ok = await _confirmDialog('Logout', 'Are you sure you want to logout?');
     if (ok) {
+<<<<<<< HEAD
       await PushNotificationService.clearTokenOnLogout();
+=======
+>>>>>>> main
       await FirebaseAuth.instance.signOut();
       if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
@@ -224,6 +293,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+<<<<<<< HEAD
   Future<void> _reviewCertificate(String uid, String name, bool approve) async {
     final status = approve ? 'verified' : 'rejected';
     await _db.collection('users').doc(uid).update({'certificateStatus': status});
@@ -250,6 +320,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+=======
+>>>>>>> main
   Future<bool> _confirmDialog(String title, String body) async {
     final result = await showDialog<bool>(
       context: context,
@@ -300,6 +372,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+<<<<<<< HEAD
               // Stream error banner — only shows if a live listener
               // (users / requests / donation count) fails, e.g. a
               // Firestore rules or connectivity issue. Dismissible so
@@ -334,6 +407,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 10),
               ],
 
+=======
+>>>>>>> main
               // Live status chip
               _liveChip(),
               const SizedBox(height: 14),
@@ -349,6 +424,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _userManagementCard(),
               const SizedBox(height: 18),
 
+<<<<<<< HEAD
               // Certificate verification — only shown when there's something
               // to review, so it doesn't clutter the dashboard otherwise.
               if (_pendingCertificates.isNotEmpty) ...[
@@ -359,6 +435,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 18),
               ],
 
+=======
+>>>>>>> main
               // Request monitoring
               _sectionHeader('Request Monitoring', Icons.monitor_heart_outlined,
                   subtitle: '${_requests.length} total'),
@@ -397,9 +475,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       actions: [
         IconButton(
+<<<<<<< HEAD
           icon: const Icon(Icons.campaign_outlined, color: Colors.white),
           tooltip: 'Send Alert',
           onPressed: _showSendAlertDialog,
+=======
+          icon: const Icon(Icons.settings_outlined, color: Colors.white),
+          onPressed: () => _snack('Settings coming soon'),
+>>>>>>> main
         ),
         IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
@@ -450,7 +533,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       _StatData('Total Users', _totalUsers, Icons.people, Colors.blue),
       _StatData('Active Requests', _activeRequests, Icons.list_alt, const Color(0xFFE53935)),
       _StatData("Today's Donations", _todayDonations, Icons.favorite, Colors.green),
+<<<<<<< HEAD
       _StatData('Critical Requests', _criticalRequests, Icons.warning_amber_rounded, Colors.orange),
+=======
+      _StatData('Pending Complaints', _pendingComplaints, Icons.warning_amber_rounded, Colors.orange),
+>>>>>>> main
     ];
 
     return GridView.builder(
@@ -559,8 +646,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   itemBuilder: (_, i) {
                     final u = _filteredUsers[i];
                     final uid = u.id;
+<<<<<<< HEAD
                     final name = (_field(u, 'fullName') ?? 'Unknown').toString();
                     final blood = (_field(u, 'bloodGroup') ?? '').toString();
+=======
+                    final name = (u['fullName'] ?? 'Unknown').toString();
+                    final blood = (u['bloodGroup'] ?? '').toString();
+>>>>>>> main
                     final initials = name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
                     return Padding(
@@ -591,7 +683,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                               fontSize: 12, fontWeight: FontWeight.w600)),
+<<<<<<< HEAD
                                       Text((_field(u, 'email') ?? '').toString(),
+=======
+                                      Text((u['email'] ?? '').toString(),
+>>>>>>> main
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                               fontSize: 10, color: Colors.grey)),
@@ -663,6 +759,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   // ────────────────────────────────────────────
+<<<<<<< HEAD
   // Certificate Verification Card
   // ────────────────────────────────────────────
   Widget _certificateVerificationCard() {
@@ -731,6 +828,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   // ────────────────────────────────────────────
+=======
+>>>>>>> main
   // Request Monitoring Card
   // ────────────────────────────────────────────
   Widget _requestMonitoringCard() {
@@ -761,7 +860,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   itemBuilder: (_, i) {
                     final req = _requests[i];
                     final docId = req.id;
+<<<<<<< HEAD
                     final status = req.displayStatus;
+=======
+                    final status = req.status;
+>>>>>>> main
                     final type = req.requestType;
                     final details = req.requestType == 'Organ Donation'
                         ? req.organ
@@ -978,6 +1081,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ────────────────────────────────────────────
   // Dialogs / Sheets
   // ────────────────────────────────────────────
+<<<<<<< HEAD
   void _showSendAlertDialog() {
     final titleCtrl = TextEditingController();
     final subtitleCtrl = TextEditingController();
@@ -1049,6 +1153,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+=======
+>>>>>>> main
   void _showUserInfo(QueryDocumentSnapshot user) {
     showDialog(
       context: context,
@@ -1060,7 +1166,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
+<<<<<<< HEAD
                 (_field(user, 'fullName') ?? 'User Info').toString(),
+=======
+                (user['fullName'] ?? 'User Info').toString(),
+>>>>>>> main
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
@@ -1071,6 +1181,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+<<<<<<< HEAD
               _dlgRow(Icons.email_outlined, 'Email', _field(user, 'email')),
               _dlgRow(Icons.phone_outlined, 'Phone', _field(user, 'phone')),
               _dlgRow(Icons.bloodtype_outlined, 'Blood Group', _field(user, 'bloodGroup')),
@@ -1078,6 +1189,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _dlgRow(Icons.wc_outlined, 'Gender', _field(user, 'gender')),
               _dlgRow(Icons.location_on_outlined, 'City', _field(user, 'city')),
               _dlgRow(Icons.volunteer_activism_outlined, 'Donor Type', _field(user, 'donorType')),
+=======
+              _dlgRow(Icons.email_outlined, 'Email', user['email']),
+              _dlgRow(Icons.phone_outlined, 'Phone', user['phone']),
+              _dlgRow(Icons.bloodtype_outlined, 'Blood Group', user['bloodGroup']),
+              _dlgRow(Icons.cake_outlined, 'DOB', user['dob']),
+              _dlgRow(Icons.wc_outlined, 'Gender', user['gender']),
+              _dlgRow(Icons.location_on_outlined, 'City', user['city']),
+              _dlgRow(Icons.volunteer_activism_outlined, 'Donor Type', user['donorType']),
+>>>>>>> main
             ],
           ),
         ),
@@ -1111,7 +1231,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const Text('Update Request Status',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
+<<<<<<< HEAD
             for (final s in ['Active', 'Pending', 'Critical', 'Fulfilled', 'Expired'])
+=======
+            for (final s in ['Active', 'Pending', 'Critical', 'Fulfilled'])
+>>>>>>> main
               ListTile(
                 leading: CircleAvatar(
                     radius: 8, backgroundColor: _statusColor(s)),
@@ -1149,7 +1273,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 'active': return Colors.green;
       case 'critical': return Colors.red;
       case 'fulfilled': return Colors.blue;
+<<<<<<< HEAD
       case 'expired': return Colors.grey;
+=======
+>>>>>>> main
       default: return Colors.orange;
     }
   }

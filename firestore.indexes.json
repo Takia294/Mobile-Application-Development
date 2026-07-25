@@ -9,6 +9,7 @@
       ]
     },
     {
+<<<<<<< HEAD
       "collectionGroup": "notifications",
       "queryScope": "COLLECTION",
       "fields": [
@@ -17,6 +18,8 @@
       ]
     },
     {
+=======
+>>>>>>> main
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [
@@ -25,11 +28,19 @@
       ]
     },
     {
+<<<<<<< HEAD
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "isAvailable", "order": "ASCENDING" },
         { "fieldPath": "donorType", "order": "ASCENDING" }
+=======
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "targetUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+>>>>>>> main
       ]
     }
   ],

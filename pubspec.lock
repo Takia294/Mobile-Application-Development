@@ -201,6 +201,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.24.1"
+<<<<<<< HEAD
   firebase_messaging:
     dependency: "direct main"
     description:
@@ -225,6 +226,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.10.10"
+=======
+>>>>>>> main
   firebase_storage:
     dependency: "direct main"
     description:
@@ -316,18 +319,32 @@ packages:
     dependency: transitive
     description:
       name: geolocator_apple
+<<<<<<< HEAD
       sha256: "853803d6bb1713c094e935b4a5ae5f19c0308acf81da13fa9ff84fb4c70c0b73"
       url: "https://pub.dev"
     source: hosted
     version: "2.3.14"
+=======
+      sha256: dbdd8789d5aaf14cf69f74d4925ad1336b4433a6efdf2fce91e8955dc921bf22
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.13"
+>>>>>>> main
   geolocator_platform_interface:
     dependency: transitive
     description:
       name: geolocator_platform_interface
+<<<<<<< HEAD
       sha256: cdb082e4f048b69da244117b7914cc60d2a8897546ffaa4f2529c786ded7aee2
       url: "https://pub.dev"
     source: hosted
     version: "4.2.8"
+=======
+      sha256: "30cb64f0b9adcc0fb36f628b4ebf4f731a2961a0ebd849f4b56200205056fe67"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.6"
+>>>>>>> main
   geolocator_web:
     dependency: transitive
     description:
@@ -344,6 +361,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.5"
+<<<<<<< HEAD
   google_identity_services_web:
     dependency: transitive
     description:
@@ -392,6 +410,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.4+4"
+=======
+>>>>>>> main
   http:
     dependency: transitive
     description:
@@ -476,10 +496,17 @@ packages:
     dependency: transitive
     description:
       name: intl
+<<<<<<< HEAD
       sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
       url: "https://pub.dev"
     source: hosted
     version: "0.20.3"
+=======
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
+>>>>>>> main
   latlong2:
     dependency: "direct main"
     description:
@@ -608,6 +635,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+<<<<<<< HEAD
   sign_in_with_apple:
     dependency: "direct main"
     description:
@@ -632,6 +660,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+=======
+>>>>>>> main
   sky_engine:
     dependency: transitive
     description: flutter
@@ -769,10 +799,17 @@ packages:
     dependency: transitive
     description:
       name: uuid
+<<<<<<< HEAD
       sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
       url: "https://pub.dev"
     source: hosted
     version: "4.6.0"
+=======
+      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.3"
+>>>>>>> main
   vector_math:
     dependency: transitive
     description:

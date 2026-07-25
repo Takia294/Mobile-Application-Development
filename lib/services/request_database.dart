@@ -45,6 +45,7 @@ class RequestDatabase {
   }
 
   // ─────────────────────────────────────────────────────────────
+<<<<<<< HEAD
   //  SUBMIT COOLDOWN
   //  Minimum gap required between two requests from the SAME user.
   //  Prevents one account from spamming the urgent-broadcast alert
@@ -81,6 +82,8 @@ class RequestDatabase {
   }
 
   // ─────────────────────────────────────────────────────────────
+=======
+>>>>>>> main
   //  SUBMIT REQUEST
   //  Called by EmergencyRequestScreen when the user taps Submit.
   //  Reads the current user's profile from the `users` collection
@@ -97,8 +100,11 @@ class RequestDatabase {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
+<<<<<<< HEAD
     await _assertNotOnCooldown(user.uid);
 
+=======
+>>>>>>> main
     // ── Fetch user profile for denormalized fields ──
     String requesterName = '';
     String requesterPhone = '';
@@ -129,6 +135,7 @@ class RequestDatabase {
     );
 
     await _requestsRef.add(model.toMap());
+<<<<<<< HEAD
 
     // ── Notify matching, available donors ──
     // Every new request (not just High/Critical) alerts the donors who
@@ -189,6 +196,8 @@ class RequestDatabase {
       });
     }
     await batch.commit();
+=======
+>>>>>>> main
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -218,6 +227,7 @@ class RequestDatabase {
 
   // ─────────────────────────────────────────────────────────────
   //  STREAM ALL REQUESTS  (admin use — all users)
+<<<<<<< HEAD
   //  [limit] bounds how many requests the Admin Dashboard reads at
   //  once — without it, a growing `requests` collection would mean
   //  every admin session re-downloads the entire history on every
@@ -229,6 +239,12 @@ class RequestDatabase {
     return _requestsRef
         .orderBy('createdAt', descending: true)
         .limit(limit)
+=======
+  // ─────────────────────────────────────────────────────────────
+  static Stream<List<RequestModel>> streamAllRequests() {
+    return _requestsRef
+        .orderBy('createdAt', descending: true)
+>>>>>>> main
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -259,6 +275,7 @@ class RequestDatabase {
     if (requestId.isEmpty) throw Exception('Invalid request ID');
     await _requestsRef.doc(requestId).delete();
   }
+<<<<<<< HEAD
 }
 
 /// Thrown by [RequestDatabase.submitRequest] when the current user is
@@ -279,4 +296,6 @@ class RequestCooldownException implements Exception {
 
   @override
   String toString() => friendlyMessage;
+=======
+>>>>>>> main
 }
